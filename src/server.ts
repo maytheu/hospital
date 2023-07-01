@@ -13,6 +13,7 @@ const server = createServer(expressApp);
 const startServer = async () => {
   await Db.connectMongo();
   await Db.syncStatus()
+  await Db.syncRole()
   server.listen(port, () => console.log(`Server starting on port ${port}...`));
 };
 

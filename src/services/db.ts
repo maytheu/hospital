@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import secret from "../utils/validateEnv";
 import { IStatus } from "../utils/interface/status.interface";
 import Status from "../model/status.model";
+import { IRole } from "../utils/interface/role.interface";
+import Role from "../model/role.model";
 
 class Db {
   mongoUrl = secret.MONGODB;
@@ -39,6 +41,20 @@ class Db {
     await Status.bulkWrite(statusBulkWite);
   };
 
+  syncRole = async () => {
+    const roleBulkWrite = this.roleData.map((role) => {
+      return {
+        updateOne: {
+          filter: { name: role.name },
+          update: { name: role.name },
+          upsert: true,
+        },
+      };
+    });
+
+    await Role.bulkWrite(roleBulkWrite);
+  };
+
   private statusData: IStatus[] = [
     { name: "Active" },
     { name: "Inactive" },
@@ -52,6 +68,8 @@ class Db {
     { name: "Serious" },
     { name: "Undetermined" },
   ];
+
+  private roleData: IRole[] = [{ name: "Admin" }, { name: "Doctor" }, { name: "Nurse" }, { name: "Patient" }];
 }
 
 export default new Db();

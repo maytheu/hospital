@@ -1,5 +1,8 @@
 import express, { Application } from "express";
 
+import AppError from "./utils/AppError";
+import { errorHandler } from "./services/error";
+
 class App {
   app: Application;
 
@@ -18,11 +21,13 @@ class App {
   private route() {
     //404 error on api
     this.app.use((req, res, next) => {
-      res.send(`Ooops.. ${req.originalUrl} not found on this server`);
+      new AppError(`Ooops.. ${req.originalUrl} not found on this server`, 404);
     });
   }
 
-  private errorHandler() {}
+  private errorHandler() {
+    this.app.use(errorHandler);
+  }
 }
 
 export default new App();

@@ -2,8 +2,8 @@ import "dotenv/config";
 import { createServer } from "http";
 
 import secret from "./utils/validateEnv";
-import App from "./app";
-import Db from "./services/db";
+import App from "./App";
+import Db from "./services/Db";
 
 const port = secret.PORT;
 const expressApp = App.app;

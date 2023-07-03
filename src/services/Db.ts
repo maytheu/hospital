@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 import secret from "../utils/validateEnv";
 import { IStatus } from "../utils/interface/status.interface";
-import Status from "../model/Status.model";
+import Status from "../model/status.model";
 import { IRole } from "../utils/interface/role.interface";
 import Role from "../model/role.model";
 
@@ -38,7 +38,7 @@ class Db {
       };
     });
 
-    // await Status.bulkWrite(statusBulkWite);
+    await Status.bulkWrite(statusBulkWite);
   };
 
   syncRole = async () => {

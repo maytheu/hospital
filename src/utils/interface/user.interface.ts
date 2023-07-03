@@ -13,16 +13,25 @@ const ICreateNewUser = z.object({
   phone: z.string().includes("+234", { message: "must include country code" }),
 });
 
-let IUser = z.object({
-//   role: z.string().refine((val) => Types.ObjectId.isValid(val)),
+const IUserId = z.object({
+  patientId: z.custom<mongoose.Schema.Types.ObjectId>(),
+});
+
+const IUserData = z.object({
+  role: z.custom<mongoose.Schema.Types.ObjectId>(),
   fullname: z.string({ invalid_type_error: "string is required", required_error: "userId is required" }),
   dateOfBirth: z.string().datetime({ message: "must be yyyy-mm-dd format" }),
   phone: z.string().includes("+234", { message: "must include country code" }),
-  status: z.custom<mongoose.Types.ObjectId>(),
+  status: z.custom<mongoose.Schema.Types.ObjectId>(),
+  address: z.string(),
+  healthHistory: z.custom<mongoose.Schema.Types.ObjectId>(),
+  laboratoryTest: z.custom<mongoose.Schema.Types.ObjectId>(),
+  vitalSigns: z.custom<mongoose.Schema.Types.ObjectId>(),
+  progressNote: z.custom<mongoose.Schema.Types.ObjectId>(),
 });
 
-IUser = IUser.merge(IUserLogin);
+const IUser = IUserData.merge(IUserLogin);
 
 type IUser = z.infer<typeof IUser>;
 
-export { ICreateNewUser, IUser, IUserLogin };
+export { ICreateNewUser, IUser, IUserLogin, IUserId };

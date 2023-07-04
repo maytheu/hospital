@@ -9,8 +9,6 @@ on:
 jobs:
   build:
     env:
-      NODE_ENV: testing
-      PORT: 4005
       MONGODB: mongodb://localhost/hospital
 
     strategy:

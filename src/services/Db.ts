@@ -1,4 +1,3 @@
-import "dotenv/config";
 import mongoose from "mongoose";
 
 import secret from "../utils/validateEnv";
@@ -14,7 +13,7 @@ class Db {
     mongoose.connection.once("open", () => console.log("Database connected"));
     mongoose.connection.on("error", async (e) => {
       console.log(e);
-      await this.disconneectMongo();
+      await this.disconnectMongo();
     });
   }
 
@@ -22,9 +21,13 @@ class Db {
     await mongoose.connect(this.mongoUrl);
   }
 
-  disconneectMongo = async () => {
+  disconnectMongo = async () => {
     await mongoose.disconnect();
   };
+
+  dropMongoDb=async () => {
+   await mongoose.connection.db.dropDatabase()
+  }
 
   syncStatus = async () => {
     const statusBulkWite = this.statusData.map((el) => {

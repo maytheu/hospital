@@ -65,7 +65,10 @@ export const errorHandler = (
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 
-  if (secret.isDevelopment) {
+  console.log(secret);
+  
+
+  if (secret.isDevelopment||secret.isTest) {
     sendErrDev(err, res);
   }
   if (secret.isProduction) {

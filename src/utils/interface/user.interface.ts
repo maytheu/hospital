@@ -10,7 +10,8 @@ const ICreateNewUser = z.object({
   role: z.enum(["Admin", "Doctor", "Nurse", "Patient"]),
   fullname: z.string({ invalid_type_error: "string is required", required_error: "userId is required" }),
   dateOfBirth: z.string().datetime({ message: "must be yyyy-mm-dd format" }),
-  phone: z.string().includes("+234", { message: "must include country code" }),
+  phone: z.string().includes("+", { message: "must include country code" }).min(10),
+  email: z.string().email({ message: "email is required" }), 
 });
 
 const IUserId = z.object({
@@ -21,7 +22,7 @@ const IUserData = z.object({
   role: z.custom<mongoose.Schema.Types.ObjectId>(),
   fullname: z.string({ invalid_type_error: "string is required", required_error: "userId is required" }),
   dateOfBirth: z.string().datetime({ message: "must be yyyy-mm-dd format" }),
-  phone: z.string().includes("+234", { message: "must include country code" }),
+  phone: z.string().includes("+", { message: "must include country code" }),
   status: z.custom<mongoose.Schema.Types.ObjectId>(),
   address: z.string(),
   healthHistory: z.custom<mongoose.Schema.Types.ObjectId>(),

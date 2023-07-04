@@ -1,0 +1,36 @@
+name: Hospital Management
+
+on:
+  push:
+    branches: ["hospital"]
+  pull_request:
+    branches: ["hospital"]
+
+jobs:
+  build:
+    env:
+      NODE_ENV: testing
+      PORT: 4005
+      MONGODB: mongodb://localhost/hospital
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+        mongo-version: [6.0]
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Nodejs v${{matrix.node-version}}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{matrix.node-version}}
+
+      - name: MongoDB in GitHub Actions
+        uses: supercharge/mongodb-github-action@1.9.0
+        with:
+          mongodb-version: ${{matrix.mongo-version}}
+
+      - run: npm install
+      - run: npm test

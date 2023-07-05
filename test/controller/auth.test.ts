@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import request from "supertest";
 
 dotenv.config({ path: ".test.env" });
+
 import App from "../../src/App";
 import Db from "../../src/services/Db";
 

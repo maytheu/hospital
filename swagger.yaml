@@ -131,15 +131,15 @@ components:
         email:
           type: string
           example: test@adetunjim.com
-        dateofBirth:
+        dateOfBirth:
           type: string
-          example: 20001-06-06
+          example: '2001-06-06'
         phone:
           type: string
-          example: +23410121389781
+          example: '+23410121389781'
         role:
           type: string
-          example: Admin|Doctor|Nurse|Patient
+          example: Admin | Doctor | Nurse | Patient
 
     Validation:
       type: object

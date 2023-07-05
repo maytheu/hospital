@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
+import { ZodError } from "zod";
 
 import AppError from "../utils/AppError";
 import secret from "../utils/validateEnv";
-
 
 const sendErrDev = (err: AppError, res: Response) => {
   return res.status(err.statusCode).json({
@@ -23,12 +23,8 @@ const sendErrProd = (err: AppError, res: Response) => {
       message: err.message,
     });
   } else {
-    console.error(
-      `something bad happens 🔥 message:${err.message} err: ${err}`
-    );
-    return res
-      .status(500)
-      .json({ status: "error", message: "Something went  wrong!" });
+    console.error(`something bad happens 🔥 message:${err.message} err: ${err}`);
+    return res.status(500).json({ status: "error", message: "Something went  wrong!" });
   }
 };
 
@@ -56,19 +52,11 @@ const mongoValidationError = (err: any) => {
  * @param res
  * @param next
  */
-export const errorHandler = (
-  err: AppError,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const errorHandler = (err: AppError, req: Request, res: Response, next: NextFunction) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 
-  console.log(secret);
-  
-
-  if (secret.isDevelopment||secret.isTest) {
+  if (secret.isDevelopment || secret.isTest) {
     sendErrDev(err, res);
   }
   if (secret.isProduction) {
@@ -81,6 +69,13 @@ export const errorHandler = (
   }
 };
 
-export const validationError = () => {
-  return new AppError("Validation Error", 422);
+export const validationError = (error: ZodError) => {
+  const msg = error.issues.map(({ path, message }) => `${path[0]} - ${message}`);
+  return new AppError(`Validation Error - ${msg.join(". ")}`, 422);
 };
+
+export const notFoundError = (error: string) => {
+  return new AppError(`${error} not found `, 404);
+};
+
+export const unauthenticatedError = () => new AppError("user/password not found", 401);

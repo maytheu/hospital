@@ -78,4 +78,6 @@ export const notFoundError = (error: string) => {
   return new AppError(`${error} not found `, 404);
 };
 
-export const unauthenticatedError = () => new AppError("user/password not found", 401);
+export const unauthenticatedError = () => {  
+ return new AppError("user/password not found", 401);
+};

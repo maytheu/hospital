@@ -4,6 +4,7 @@ import Api from "./Api";
 import { ICreateNewUser, IUserLogin } from "../utils/interface/user.interface";
 import { validationError } from "../services/error";
 import AuthService from "../services/Auth.service";
+import AppError from "../utils/AppError";
 
 class Auth extends Api {
   newUser: RequestHandler = async (req, res, next) => {
@@ -15,7 +16,9 @@ class Auth extends Api {
       if (!data.success) return next(validationError(data.error));
 
       const resp = await AuthService.createUser(req.body);
-      this.sendResp(res, "Account successfully created", { data: resp });
+      if (resp instanceof AppError) return next(resp);
+
+      this.sendCreatedResp(res, "Account successfully created", { data: resp });
     } catch (error) {
       next(error);
     }
@@ -27,6 +30,9 @@ class Auth extends Api {
       if (!d.success) return next(validationError(d.error));
 
       const user = await AuthService.login(req.body);
+      if (user instanceof AppError) return next(user);
+
+      this.sendResp(res, "login successful", { user });
     } catch (error) {
       next(error);
     }

@@ -1,39 +1,56 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { NextFunction } from "express";
 
 import { ICreateNewUser, IUser, IUserLogin } from "../utils/interface/user.interface";
 import UtilsService from "./Utils.service";
 import User from "../model/user.model";
 import { notFoundError, unauthenticatedError } from "./error";
+import secret from "../utils/validateEnv";
 
 class AuthService {
   createUser = async (user: ICreateNewUser) => {
-    //generate random password
-    const password = this.genPass();
-    //encrpy password
-    const hash = await this.encryptPassword(password);
+    try {
+      //generate random password
+      const password = this.genPass();
+      //encrpy password
+      const hash = await this.encryptPassword(password);
 
-    //fetch status and role id
-    const [status, role] = await Promise.all([
-      UtilsService.getStatusId({ name: "Active" }),
-      UtilsService.getRoleById({ name: user.role }),
-    ]);
-    //save
-    const createUser: IUser = { ...user, password: hash, status, role: role };
-    await User.create(createUser);
-    //send to email
-    console.log(password);
+      //fetch status and role id
+      const [status, role] = await Promise.all([
+        UtilsService.getStatusId({ name: "Active" }),
+        UtilsService.getRoleById({ name: user.role }),
+      ]);
+      //save
+      const createUser: IUser = { ...user, password: hash, status, role: role };
+      await User.create(createUser);
+      //send to email
+      console.log(password);
 
-    return `Please check your email(${user.email}) to copy credentials`;
+      return `Please check your email(${user.email}) to copy credentials`;
+    } catch (error) {
+      return error;
+    }
   };
 
   login = async (data: IUserLogin) => {
-    const user = await User.findOne({ email: data.email }, "password");
-    if (!user) return notFoundError("User/Password");
+    try {
+      const user = await User.findOne({ email: data.email }, "password id role");
+      console.log(user);
 
-    const checkPass = this.comparePassword(data.password, user.password);
-    if (!checkPass) return unauthenticatedError();
+      if (!user) return unauthenticatedError();
 
-    //gen token
+      const checkPass = this.comparePassword(data.password, user.password);
+      if (!checkPass) return unauthenticatedError();
+
+      //gen token
+      const payload = { user: user.id, role: user.role };
+      const token = this.genToken(payload, secret.JWTSIGN);
+
+      return token;
+    } catch (error) {
+      return error;
+    }
   };
 
   /**
@@ -72,6 +89,17 @@ class AuthService {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
     return hash;
+  };
+
+  /**
+   *
+   * @param data payload
+   * @param key secret
+   * @param time expiration time
+   * @returns signed token
+   */
+  private genToken = async (data: object, key: string, time: string = "10d") => {
+    return await jwt.sign(data, key, { expiresIn: time });
   };
 }
 

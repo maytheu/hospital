@@ -47,7 +47,7 @@ describe("Unit test for auth service", () => {
     };
     let password: string;
     beforeAll(async () => {
-      // await Db.connectMongo();
+      await Db.connectMongo();
       // await Db.syncStatus();
       // await Db.syncRole();
 

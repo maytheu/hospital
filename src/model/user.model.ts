@@ -11,7 +11,7 @@ const userSchema = new Schema<IUser>(
     phone: { type: String, min: 10 },
     role: { type: Types.ObjectId, ref: "role" },
     status: { type: Types.ObjectId, ref: "status" },
-    address: { type: String, required: true },
+    address: { type: String, },
     // healthHistory:{type:Types.ObjectId, ref:'history'},
     // laboratoryTest:{type:Types.ObjectId, ref:'laboratory'}
     // progressNote:{type:Types.ObjectId, ref:'progress'}

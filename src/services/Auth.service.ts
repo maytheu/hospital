@@ -1,15 +1,14 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { NextFunction } from "express";
 
-import { ICreateNewUser, IUser, IUserLogin } from "../utils/interface/user.interface";
+import { ICreateNewUser, IPasswordChange, IUser, IUserLogin } from "../utils/interface/user.interface";
 import UtilsService from "./Utils.service";
 import User from "../model/user.model";
-import { notFoundError, unauthenticatedError } from "./error";
+import { forbiddenError, notFoundError, unauthenticatedError } from "./error";
 import secret from "../utils/validateEnv";
 
 class AuthService {
-  createUser = async (user: ICreateNewUser) => {
+  createUser = async (user: ICreateNewUser): Promise<{ data: any; password: string }> => {
     try {
       //generate random password
       const password = this.genPass();
@@ -24,23 +23,22 @@ class AuthService {
       //save
       const createUser: IUser = { ...user, password: hash, status, role: role };
       await User.create(createUser);
+
       //send to email
       console.log(password);
 
-      return `Please check your email(${user.email}) to copy credentials`;
+      return { data: `Please check your email(${user.email}) to copy credentials`, password };
     } catch (error) {
-      return error;
+      return { data: error, password: "" };
     }
   };
 
   login = async (data: IUserLogin) => {
     try {
       const user = await User.findOne({ email: data.email }, "password id role");
-      console.log(user);
-
       if (!user) return unauthenticatedError();
 
-      const checkPass = this.comparePassword(data.password, user.password);
+      const checkPass = await this.comparePassword(data.password, user.password);
       if (!checkPass) return unauthenticatedError();
 
       //gen token
@@ -48,6 +46,22 @@ class AuthService {
       const token = this.genToken(payload, secret.JWTSIGN);
 
       return token;
+    } catch (error) {
+      return error;
+    }
+  };
+
+  updatePassword = async (password: IPasswordChange, id: string) => {
+    try {
+      const user = await User.findById(id, "password");
+      if (!user) return notFoundError("Entity");
+
+      const checkPass = await this.comparePassword(password.oldPassword, user.password);
+      if (!checkPass) return forbiddenError();
+
+      const hash = await this.encryptPassword(password.newPassword);
+       await User.findByIdAndUpdate(id, { password: hash });
+      return;
     } catch (error) {
       return error;
     }
@@ -92,7 +106,7 @@ class AuthService {
   };
 
   /**
-   *
+   * generate jwt
    * @param data payload
    * @param key secret
    * @param time expiration time

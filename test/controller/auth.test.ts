@@ -17,10 +17,10 @@ describe("Should handle auth route", () => {
     await Db.syncRole();
   });
 
-  afterAll(async () => {
-    Db.disconnectMongo();
-    Db.dropMongoDb();
-  });
+  // afterAll(async () => {
+  //   Db.disconnectMongo();
+  //   Db.dropMongoDb();
+  // });
 
   describe("Should test the new user api", () => {
     const newUserwithErr = { fullname: "test error", dateOfBirth: "2004-11-12", role: "Admin", email: "me@.com" };

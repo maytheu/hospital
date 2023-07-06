@@ -12,10 +12,10 @@ describe("Should test util component", () => {
     await Db.syncRole();
   });
 
-  afterAll(async () => {
-    Db.disconnectMongo();
-    Db.dropMongoDb();
-  });
+  // afterAll(async () => {
+  //   Db.disconnectMongo();
+  //   Db.dropMongoDb();
+  // });
 
   it("Should return an id from status", async () => {
     const sts = await UtilService.getStatusId({ name: "Active" });

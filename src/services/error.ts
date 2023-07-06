@@ -81,3 +81,7 @@ export const notFoundError = (error: string) => {
 export const unauthenticatedError = () => {  
  return new AppError("user/password not found", 401);
 };
+
+export const forbiddenError = () => {  
+  return new AppError("Not allowed", 403);
+ };

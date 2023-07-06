@@ -9,9 +9,9 @@ const IUserLogin = z.object({
 const ICreateNewUser = z.object({
   role: z.enum(["Admin", "Doctor", "Nurse", "Patient"]),
   fullname: z.string({ invalid_type_error: "string is required", required_error: "userId is required" }),
-  dateOfBirth: z.date({ required_error: "must be yyyy-mm-dd format", }),
+  dateOfBirth: z.date({ required_error: "must be yyyy-mm-dd format" }),
   phone: z.string().includes("+", { message: "must include country code" }).min(10),
-  email: z.string().email({ message: "email is required" }), 
+  email: z.string().email({ message: "email is required" }),
 });
 
 const IUserId = z.object({
@@ -21,7 +21,7 @@ const IUserId = z.object({
 const IUserData = z.object({
   role: z.custom<mongoose.Schema.Types.ObjectId>(),
   fullname: z.string({ invalid_type_error: "string is required", required_error: "userId is required" }),
-  dateOfBirth: z.date({ required_error: "must be yyyy-mm-dd format", }),
+  dateOfBirth: z.date({ required_error: "must be yyyy-mm-dd format" }),
   phone: z.string().includes("+", { message: "must include country code" }),
   status: z.custom<mongoose.Schema.Types.ObjectId>(),
   address: z.string().optional(),
@@ -31,10 +31,19 @@ const IUserData = z.object({
   // progressNote: z.custom<mongoose.Schema.Types.ObjectId>(),
 });
 
+const IPasswordChange = z.object({
+  oldPassword: z.string({ required_error: "oldPassword field is required" }),
+  newPassword: z
+    .string({ required_error: "newPassword field is required" })
+    .min(6, { message: "password cannot be less than 6 characters" })
+    .regex(/^(?=.*[a-zA-Z0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,}$/, { message: "password should include alphabet, number and special charcters" }),
+});
+
 const IUser = IUserData.merge(IUserLogin);
 
 type IUser = z.infer<typeof IUser>;
-type ICreateNewUser = z.infer<typeof ICreateNewUser>
-type IUserLogin = z.infer<typeof IUserLogin>
+type ICreateNewUser = z.infer<typeof ICreateNewUser>;
+type IUserLogin = z.infer<typeof IUserLogin>;
+type IPasswordChange= z.infer<typeof IPasswordChange>
 
-export { ICreateNewUser, IUser, IUserLogin, IUserId };
+export { ICreateNewUser, IUser, IUserLogin, IUserId, IPasswordChange };

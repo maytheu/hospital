@@ -10,6 +10,7 @@ jobs:
   build:
     env:
       MONGODB: mongodb://localhost/hospital
+      JWTSIGN: TYCVKBJHvyulbnlm;kjchtyvbjhn
 
     strategy:
       matrix:

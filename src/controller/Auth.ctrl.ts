@@ -34,10 +34,10 @@ class Auth extends Api {
       const d = await IUserLogin.safeParse(req.body);
       if (!d.success) return next(validationError(d.error));
 
-      const user = await AuthService.login(req.body);
-      if (user instanceof AppError || user instanceof Error) return next(user);
+      const token = await AuthService.login(req.body);
+      if (token instanceof AppError || token instanceof Error) return next(token);
 
-      this.sendResp(res, "login successful", { user });
+      this.sendResp(res, "login successful", { token });
     } catch (error) {
       next(error);
     }

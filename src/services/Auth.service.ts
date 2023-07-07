@@ -33,7 +33,7 @@ class AuthService {
     }
   };
 
-  login = async (data: IUserLogin) => {
+  login = async (data: IUserLogin): Promise<any> => {
     try {
       const user = await User.findOne({ email: data.email }, "password id role");
       if (!user) return unauthenticatedError();
@@ -43,7 +43,7 @@ class AuthService {
 
       //gen token
       const payload = { user: user.id, role: user.role };
-      const token = this.genToken(payload, secret.JWTSIGN);
+      const token = await this.genToken(payload, secret.JWTSIGN);
 
       return token;
     } catch (error) {
@@ -60,7 +60,7 @@ class AuthService {
       if (!checkPass) return forbiddenError();
 
       const hash = await this.encryptPassword(password.newPassword);
-       await User.findByIdAndUpdate(id, { password: hash });
+      await User.findByIdAndUpdate(id, { password: hash });
       return;
     } catch (error) {
       return error;

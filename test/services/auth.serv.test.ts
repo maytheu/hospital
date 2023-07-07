@@ -16,6 +16,7 @@ const appRequest = request(app);
 const authUrl = "/hospital/api/v1/auth";
 
 describe("Unit test for auth service", () => {
+  let token;
   beforeAll(async () => {
     await Db.connectMongo();
     await Db.syncRole();
@@ -23,8 +24,8 @@ describe("Unit test for auth service", () => {
   });
 
   afterAll(async () => {
+    await Db.dropMongoDb();
     await Db.disconnectMongo();
-    // await Db.dropMongoDb();
   });
 
   it("should return string of length 15", () => {
@@ -63,14 +64,16 @@ describe("Unit test for auth service", () => {
       phone: "+23410121389781",
       role: "Admin",
     };
+
     let password: string;
     beforeAll(async () => {
       const data = await AuthService.createUser(user);
       password = data.password;
     });
 
-    it("Should login", async () => {
-      expect(await AuthService.login({ email: user.email, password })).toBeTruthy();
+    it("Should return token", async () => {
+      token = await AuthService.login({ email: user.email, password });
+      expect(token.split(".").length).toBe(3);
     });
 
     it("should not login ", async () => {
@@ -113,5 +116,9 @@ describe("Unit test for auth service", () => {
     it("Should return 401 reponse since user not logged in", async () => {
       await appRequest.post(`${authUrl}/login`).send({ email: "test@mato.com", password: "!Pass123" }).expect(401);
     });
+
+    // it('should looad user profile',()=>{
+
+    // })
   });
 });

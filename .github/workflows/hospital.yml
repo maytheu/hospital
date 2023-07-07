@@ -11,7 +11,10 @@ jobs:
     env:
       MONGODB: mongodb://localhost/hospital
       JWTSIGN: TYCVKBJHvyulbnlm;kjchtyvbjhn
-
+      EMAIL_USERNAME: jklkl
+      EMAIL_HOST: p;ljk
+      EMAIL_PORT: 232
+      EMAIL_PASSWORD: lrroe
     strategy:
       matrix:
         node-version: [14.x, 16.x, 18.x]

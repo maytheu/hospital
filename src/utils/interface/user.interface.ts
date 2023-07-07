@@ -7,7 +7,7 @@ const IUserLogin = z
     password: z
       .string()
       .min(6, { message: "password cannot be less than size" })
-      .regex(/^(?=.*[a-zA-Z0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,}$/, {
+      .regex(/^(?=.*[A-Z]).{8,}/, {
         message: "password should include alphabet, number and special charcters",
       }),
   })

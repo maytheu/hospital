@@ -16,8 +16,10 @@ const appRequest = request(app);
 const authUrl = "/hospital/api/v1/auth";
 
 describe("Unit test for auth service", () => {
-  let token: string;
-  let password: string;
+  let tokenAdmin: string;
+  let tokenDoc: string;
+  let passwordAdmin: string;
+  let passwordDoc: string;
   beforeAll(async () => {
     await Db.connectMongo();
     await Db.syncRole();
@@ -52,13 +54,13 @@ describe("Unit test for auth service", () => {
 
   it("Should return the same payload", async () => {
     const payload = { el: "test payload" };
-    const token = await AuthService["genToken"](payload, secret.JWTSIGN);
-    const decoded = await UtilsService["verifyToken"](token, secret.JWTSIGN);
+    const tokenAdmin = await AuthService["genToken"](payload, secret.JWTSIGN);
+    const decoded = await UtilsService["verifyToken"](tokenAdmin, secret.JWTSIGN);
     expect(decoded).toMatchObject(payload);
   });
 
   describe("should test auth flow", () => {
-    const user: ICreateNewUser = {
+    const userAdmin: ICreateNewUser = {
       fullname: "patient one",
       email: "test@adetunjim.com",
       dateOfBirth: new Date("2001-06-06"),
@@ -66,18 +68,28 @@ describe("Unit test for auth service", () => {
       role: "Admin",
     };
 
+    const userDoc: ICreateNewUser = {
+      fullname: "Doctor one",
+      email: "testdoc@adetunjim.com",
+      dateOfBirth: new Date("2001-06-06"),
+      phone: "+23410121389781",
+      role: "Doctor",
+    };
+
     beforeAll(async () => {
-      const data = await AuthService.createUser(user);
-      password = data.password;
+      const data = await AuthService.createUser(userAdmin);
+      const dataDoc = await AuthService.createUser(userDoc);
+      passwordAdmin = data.password;
+      passwordDoc = dataDoc.password;
     });
 
     it("Should return token", async () => {
-      token = await AuthService.login({ email: user.email, password });
-      expect(token.split(".").length).toBe(3);
+      tokenAdmin = await AuthService.login({ email: userAdmin.email, password: passwordAdmin });
+      expect(tokenAdmin.split(".").length).toBe(3);
     });
 
     it("should not login ", async () => {
-      expect(await AuthService.login({ email: "user@email.com", password })).toMatchObject({
+      expect(await AuthService.login({ email: "user@email.com", password: passwordAdmin })).toMatchObject({
         message: "user/password not found",
       });
     });
@@ -109,6 +121,19 @@ describe("Unit test for auth service", () => {
       await appRequest.post(`${authUrl}/new`).send(newUser).expect(401);
     });
 
+    it("Should return 200 reponse for doctor login and token", async () => {
+      const resp = await appRequest
+        .post(`${authUrl}/login`)
+        .send({ email: "testdoc@adetunjim.com", password: passwordDoc })
+        .expect(200);
+      tokenDoc = resp.body.data.token;
+      expect(tokenDoc.split(".").length).toBe(3);
+    });
+
+    it("Should return 403 since only admin can create new account", async () => {
+      await appRequest.post(`${authUrl}/new`).set("Authorization", `Bearer ${tokenDoc}`).send(newUser).expect(403);
+    });
+
     it("Should return 422 reponse", async () => {
       await appRequest.post(`${authUrl}/login`).send({ email: "test@mato", password: "!Pass123" }).expect(422);
     });
@@ -118,37 +143,37 @@ describe("Unit test for auth service", () => {
     });
 
     it("should return user profile with 200", async () => {
-      await appRequest.get(`${authUrl}/me`).set("Authorization", `Bearer ${token}`).expect(200);
+      await appRequest.get(`${authUrl}/me`).set("Authorization", `Bearer ${tokenAdmin}`).expect(200);
     });
 
     it("should update to new password with 200", async () => {
       await appRequest
         .put(`${authUrl}/update-password`)
-        .set("Authorization", `Bearer ${token}`)
-        .send({ oldPassword: password, newPassword: "@Pass123" })
+        .set("Authorization", `Bearer ${tokenAdmin}`)
+        .send({ oldPassword: passwordAdmin, newPassword: "@Pass123" })
         .expect(200);
     });
 
     it("should return 422 for bad password format", async () => {
       await appRequest
         .put(`${authUrl}/update-password`)
-        .set("Authorization", `Bearer ${token}`)
-        .send({ oldPassword: password, newPassword: "@12345t" })
+        .set("Authorization", `Bearer ${tokenAdmin}`)
+        .send({ oldPassword: passwordAdmin, newPassword: "@12345t" })
         .expect(422);
     });
 
     it("should not update with wrong password and return 403", async () => {
       await appRequest
         .put(`${authUrl}/update-password`)
-        .set("Authorization", `Bearer ${token}`)
-        .send({ oldPassword: password, newPassword: "@Pass123" })
+        .set("Authorization", `Bearer ${tokenAdmin}`)
+        .send({ oldPassword: passwordAdmin, newPassword: "@Pass123" })
         .expect(403);
     });
 
     it("Should update user profile with 200", async () => {
       await appRequest
         .put(`${authUrl}/update-profile`)
-        .set("Authorization", `Bearer ${token}`)
+        .set("Authorization", `Bearer ${tokenAdmin}`)
         .send({ phone: "+123456789876", address: "updated address" })
         .expect(200);
     });
@@ -156,7 +181,7 @@ describe("Unit test for auth service", () => {
     it("Should return 422 since email and password cannot be updated", async () => {
       await appRequest
         .put(`${authUrl}/update-profile`)
-        .set("Authorization", `Bearer ${token}`)
+        .set("Authorization", `Bearer ${tokenAdmin}`)
         .send({ email: "me@mato.com", password: "updated address" })
         .expect(422);
     });

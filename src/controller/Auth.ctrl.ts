@@ -31,7 +31,6 @@ class Auth extends Api {
 
   login: RequestHandler = async (req, res, next) => {
     try {
-      //i%2FxC7Wq8YFKh8
       const d = await IUserLogin.safeParse(req.body);
       if (!d.success) return next(validationError(d.error));
 

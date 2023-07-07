@@ -5,7 +5,7 @@ import UtilsService from "../services/Utils.service";
 
 const authRouter = Router();
 
-authRouter.post("/new", AuthCtrl.newUser);
+authRouter.post("/new", UtilsService.authentication, AuthCtrl.newUser);
 authRouter.post('/login', AuthCtrl.login)
 authRouter.get('/me', UtilsService.authentication, AuthCtrl.profile)
 authRouter.put('/update-password', UtilsService.authentication, AuthCtrl.updatePassword)

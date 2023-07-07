@@ -17,17 +17,17 @@ class Db {
     });
   }
 
-  async connectMongo() {
+  connectMongo = async () => {
     await mongoose.connect(this.mongoUrl);
-  }
+  };
 
   disconnectMongo = async () => {
     await mongoose.disconnect();
   };
 
-  dropMongoDb=async () => {
-   await mongoose.connection.db.dropDatabase()
-  }
+  dropMongoDb = async () => {
+    await mongoose.connection.db.dropDatabase();
+  };
 
   syncStatus = async () => {
     const statusBulkWite = this.statusData.map((el) => {

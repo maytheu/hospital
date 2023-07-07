@@ -1,14 +1,32 @@
 import dotenv from "dotenv";
+import request from "supertest";
 
 dotenv.config({ path: ".test.env" });
 
-import AuthService from "../../src/services/Auth.service";
-import UtilsService from "../../src/services/Utils.service";
-import secret from "../../src/utils/validateEnv";
 import Db from "../../src/services/Db";
+import UtilsService from "../../src/services/Utils.service";
+import AuthService from "../../src/services/Auth.service";
+import secret from "../../src/utils/validateEnv";
 import { ICreateNewUser } from "../../src/utils/interface/user.interface";
 
+import App from "../../src/App";
+
+const app = App.app;
+const appRequest = request(app);
+const authUrl = "/hospital/api/v1/auth";
+
 describe("Unit test for auth service", () => {
+  beforeAll(async () => {
+    await Db.connectMongo();
+    await Db.syncRole();
+    await Db.syncStatus();
+  });
+
+  afterAll(async () => {
+    await Db.disconnectMongo();
+    // await Db.dropMongoDb();
+  });
+
   it("should return string of length 15", () => {
     expect(AuthService["genPass"]().length).toBe(15);
   });
@@ -47,27 +65,53 @@ describe("Unit test for auth service", () => {
     };
     let password: string;
     beforeAll(async () => {
-      await Db.connectMongo();
-      // await Db.syncStatus();
-      // await Db.syncRole();
-
       const data = await AuthService.createUser(user);
       password = data.password;
     });
-
-    // afterAll(async () => {
-    //   Db.disconnectMongo();
-    //   Db.dropMongoDb();
-    // });
 
     it("Should login", async () => {
       expect(await AuthService.login({ email: user.email, password })).toBeTruthy();
     });
 
-    // it("should not login ", async () => {
-    //   expect(await AuthService.login({ email: "user@email.com", password })).toMatchObject({
-    //     message: "user/password not found",
-    //   });
-    // });
+    it("should not login ", async () => {
+      expect(await AuthService.login({ email: "user@email.com", password })).toMatchObject({
+        message: "user/password not found",
+      });
+    });
+  });
+
+  describe("Should test util component", () => {
+    it("Should return an id from status", async () => {
+      const sts = await UtilsService.getStatusId({ name: "Active" });
+      expect(sts).toBeTruthy();
+    });
+
+    it("Should return an id from role", async () => {
+      const sts = await UtilsService.getRoleById({ name: "Doctor" });
+      expect(sts).toBeTruthy();
+    });
+  });
+
+  describe("Should handle auth route", () => {
+    const newUserwithErr = { fullname: "test error", dateOfBirth: "2004-11-12", role: "Admin", email: "me@.com" };
+    const newUser = {
+      fullname: "test ok",
+      dateOfBirth: "2004-11-12",
+      role: "Patient",
+      email: "me@adetunjim.com",
+      phone: "+123454231526",
+    };
+
+    it("Should return 401 reponse since since only admin can create new", async () => {
+      await appRequest.post(`${authUrl}/new`).send(newUser).expect(401);
+    });
+
+    it("Should return 422 reponse", async () => {
+      await appRequest.post(`${authUrl}/login`).send({ email: "test@mato", password: "!Pass123" }).expect(422);
+    });
+
+    it("Should return 401 reponse since user not logged in", async () => {
+      await appRequest.post(`${authUrl}/login`).send({ email: "test@mato.com", password: "!Pass123" }).expect(401);
+    });
   });
 });

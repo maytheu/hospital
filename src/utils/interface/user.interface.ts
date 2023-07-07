@@ -3,7 +3,12 @@ import { z } from "zod";
 
 const IUserLogin = z.object({
   email: z.string().email({ message: "email is required" }),
-  password: z.string().min(6, { message: "password cannot be less than size" }),
+  password: z
+    .string()
+    .min(6, { message: "password cannot be less than size" })
+    .regex(/^(?=.*[a-zA-Z0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,}$/, {
+      message: "password should include alphabet, number and special charcters",
+    }),
 });
 
 const ICreateNewUser = z.object({
@@ -36,7 +41,9 @@ const IPasswordChange = z.object({
   newPassword: z
     .string({ required_error: "newPassword field is required" })
     .min(6, { message: "password cannot be less than 6 characters" })
-    .regex(/^(?=.*[a-zA-Z0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,}$/, { message: "password should include alphabet, number and special charcters" }),
+    .regex(/^(?=.*[a-zA-Z0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,}$/, {
+      message: "password should include alphabet, number and special charcters",
+    }),
 });
 
 const IUser = IUserData.merge(IUserLogin);
@@ -44,6 +51,6 @@ const IUser = IUserData.merge(IUserLogin);
 type IUser = z.infer<typeof IUser>;
 type ICreateNewUser = z.infer<typeof ICreateNewUser>;
 type IUserLogin = z.infer<typeof IUserLogin>;
-type IPasswordChange= z.infer<typeof IPasswordChange>
+type IPasswordChange = z.infer<typeof IPasswordChange>;
 
 export { ICreateNewUser, IUser, IUserLogin, IUserId, IPasswordChange };

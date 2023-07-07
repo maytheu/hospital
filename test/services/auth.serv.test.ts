@@ -16,7 +16,8 @@ const appRequest = request(app);
 const authUrl = "/hospital/api/v1/auth";
 
 describe("Unit test for auth service", () => {
-  let token;
+  let token: string;
+  let password: string;
   beforeAll(async () => {
     await Db.connectMongo();
     await Db.syncRole();
@@ -65,7 +66,6 @@ describe("Unit test for auth service", () => {
       role: "Admin",
     };
 
-    let password: string;
     beforeAll(async () => {
       const data = await AuthService.createUser(user);
       password = data.password;
@@ -117,8 +117,48 @@ describe("Unit test for auth service", () => {
       await appRequest.post(`${authUrl}/login`).send({ email: "test@mato.com", password: "!Pass123" }).expect(401);
     });
 
-    // it('should looad user profile',()=>{
+    it("should return user profile with 200", async () => {
+      await appRequest.get(`${authUrl}/me`).set("Authorization", `Bearer ${token}`).expect(200);
+    });
 
-    // })
+    it("should update to new password with 200", async () => {
+      await appRequest
+        .put(`${authUrl}/update-password`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ oldPassword: password, newPassword: "@Pass123" })
+        .expect(200);
+    });
+
+    it("should return 422 for bad password format", async () => {
+      await appRequest
+        .put(`${authUrl}/update-password`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ oldPassword: password, newPassword: "@12345t" })
+        .expect(422);
+    });
+
+    it("should not update with wrong password and return 403", async () => {
+      await appRequest
+        .put(`${authUrl}/update-password`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ oldPassword: password, newPassword: "@Pass123" })
+        .expect(403);
+    });
+
+    it("Should update user profile with 200", async () => {
+      await appRequest
+        .put(`${authUrl}/update-profile`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ phone: "+123456789876", address: "updated address" })
+        .expect(200);
+    });
+
+    it("Should return 422 since email and password cannot be updated", async () => {
+      await appRequest
+        .put(`${authUrl}/update-profile`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ email: "me@mato.com", password: "updated address" })
+        .expect(422);
+    });
   });
 });

@@ -199,6 +199,62 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Unauthorized"
+        "404":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Validation"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/update-profile:
+    put:
+      tags:
+        - auth
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: update profile - address, phone, dateOfBirth and fullname can be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "404":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
         "422":
           description: Validation error
           content:
@@ -237,6 +293,19 @@ components:
           example: 500
         message:
           type: string
+
+    NotFound:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        statusCode:
+          type: number
+          example: 404
+        message:
+          type: string
+          example: resource not found
 
     Unauthenticated:
       type: object

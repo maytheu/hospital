@@ -9,5 +9,6 @@ authRouter.post("/new", UtilsService.authentication, AuthCtrl.newUser);
 authRouter.post('/login', AuthCtrl.login)
 authRouter.get('/me', UtilsService.authentication, AuthCtrl.profile)
 authRouter.put('/update-password', UtilsService.authentication, AuthCtrl.updatePassword)
+authRouter.put('/update-profile', UtilsService.authentication, AuthCtrl.updateProfile)
 
 export default authRouter;

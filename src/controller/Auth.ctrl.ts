@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 
 import Api from "./Api";
-import { ICreateNewUser, IPasswordChange, IUserLogin } from "../utils/interface/user.interface";
+import { ICreateNewUser, IPasswordChange, IUpdateProfile, IUserLogin } from "../utils/interface/user.interface";
 import { validationError } from "../services/error";
 import AuthService from "../services/Auth.service";
 import AppError from "../utils/AppError";
@@ -9,6 +9,7 @@ import Lab from "../model/laboratory.model";
 import Progress from "../model/progress.model";
 import Medication from "../model/medication.model";
 import Surgery from "../model/surgery.model";
+import User from "../model/user.model";
 
 class Auth extends Api {
   newUser: RequestHandler = async (req, res, next) => {
@@ -67,6 +68,21 @@ class Auth extends Api {
       if (data instanceof AppError || data instanceof Error) return next(data);
 
       this.sendResp(res, "Password changed", {});
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateProfile: RequestHandler = async (req, res, next) => {
+    try {
+      const d = IUpdateProfile.safeParse(req.body);
+      if (!d.success) return next(validationError(d.error));
+
+      const data = req.body;
+      const { user } = req;
+      await User.findByIdAndUpdate(user!.id, data);
+
+      this.sendResp(res, "Profile updated", {});
     } catch (error) {
       next(error);
     }

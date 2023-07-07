@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-import { ICreateNewUser, IPasswordChange, IUser, IUserLogin } from "../utils/interface/user.interface";
+import { ICreateNewUser, IPasswordChange, IUpdateProfile, IUser, IUserLogin } from "../utils/interface/user.interface";
 import UtilsService from "./Utils.service";
 import User from "../model/user.model";
 import { forbiddenError, notFoundError, unauthenticatedError } from "./error";

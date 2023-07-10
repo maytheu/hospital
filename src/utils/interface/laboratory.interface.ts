@@ -3,11 +3,14 @@ import { z } from "zod";
 
 import { IUserId } from "./user.interface";
 
-const ILaboratoryData = z.object({
-  name: z.string({ required_error: "name is required" }),
-  description: z.string().optional(),
-  result: z.string().optional(),
-});
+const ILaboratoryData = z
+  .object({
+    name: z.string({ required_error: "name is required" }),
+    description: z.string().optional(),
+    result: z.string().optional(),
+    conductedBy: z.string().optional(),
+  })
+  .strict();
 
 const ILaboratory = ILaboratoryData.merge(IUserId);
 

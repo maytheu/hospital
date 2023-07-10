@@ -12,6 +12,8 @@ servers:
 tags:
   - name: auth
     description: authentication and authorization
+  - name: lab
+    description: view lab result
 
 paths:
   /auth/login:
@@ -268,6 +270,194 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /lab:
+    get:
+      tags:
+        - lab
+      security:
+        - bearerAuth: []
+      description: Load all patient lab result
+      operationId: labs
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Laboratory"
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /lab/{labId}:
+    get:
+      tags:
+        - lab
+      security:
+        - bearerAuth: []
+      description: Load patient lab result
+      operationId: lab
+      parameters:
+        - name: labId
+          in: path
+          description: Laboratory id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Laboratory"
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /lab/new:
+    post:
+      tags:
+        - lab
+      summary: create new Laboratory test
+      description: only name is required
+      operationId: newLab
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: new test
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LaboratoryData"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Please check your email to confirm ur login
+                  data:
+                    type: object
+                    properties:
+                      data:
+                        type: string
+                        example: Account created
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthorized"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Validation"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /lab/update/{labId}:
+    put:
+      tags:
+        - lab
+      summary: update Laboratory test
+      description: only result required
+      operationId: updateLab
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: labId
+          in: path
+          description: Laboratory id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: new test
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LaboratoryData"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Please check your email to confirm ur login
+                  data:
+                    type: object
+                    properties:
+                      data:
+                        type: string
+                        example: Account created
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthorized"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Validation"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
 components:
   schemas:
     Duplicate:
@@ -292,6 +482,30 @@ components:
           type: number
           example: 500
         message:
+          type: string
+
+    Laboratory:
+      type: object
+      properties:
+        name:
+          type: string
+          example: DNA test
+        description:
+          type: string
+        result:
+          type: string
+        conductedBy:
+          type: string
+
+    LaboratoryData:
+      type: object
+      properties:
+        name:
+          type: string
+          example: DNA test
+        description:
+          type: string
+        result:
           type: string
 
     NotFound:

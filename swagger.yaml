@@ -284,9 +284,14 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Laboratory"
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Laboratory"
         "401":
           description: Unauthenticated
           content:
@@ -321,7 +326,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Laboratory"
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Laboratory"
         "401":
           description: Unauthenticated
           content:
@@ -340,7 +350,7 @@ paths:
       tags:
         - lab
       summary: create new Laboratory test
-      description: only name is required
+      description:  name and email is required
       operationId: newLab
       security:
         - bearerAuth: []
@@ -380,6 +390,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Unauthorized"
+        "404":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
         "422":
           description: Validation error
           content:
@@ -398,7 +414,7 @@ paths:
       tags:
         - lab
       summary: update Laboratory test
-      description: only result required
+      description: only result is required
       operationId: updateLab
       security:
         - bearerAuth: []
@@ -417,7 +433,7 @@ paths:
             schema:
               $ref: "#/components/schemas/LaboratoryData"
       responses:
-        "201":
+        "200":
           description: Created
           content:
             application/json:
@@ -445,6 +461,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Unauthorized"
+        "404":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
         "422":
           description: Validation error
           content:
@@ -503,6 +525,8 @@ components:
         name:
           type: string
           example: DNA test
+        email:
+          type: string
         description:
           type: string
         result:

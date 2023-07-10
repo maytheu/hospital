@@ -26,7 +26,7 @@ class AuthService {
 
       //send to email
       console.log(password);
-      await UtilsService.sendWelcomeEmail(createUser, password);
+      if (!secret.isTest) await UtilsService.sendWelcomeEmail(createUser, password);
 
       return { data: `Please check your email(${user.email}) to copy credentials`, password };
     } catch (error) {

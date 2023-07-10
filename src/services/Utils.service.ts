@@ -1,6 +1,9 @@
 import jwt from "jsonwebtoken";
 import { RequestHandler } from "express";
 import nodemailer from "nodemailer";
+import { convert } from "html-to-text";
+import pug from "pug";
+import path from "path";
 
 import Role from "../model/role.model";
 import Status from "../model/status.model";
@@ -9,6 +12,7 @@ import { IStatus } from "../utils/interface/status.interface";
 import { forbiddenError, unauthenticatedError } from "./error";
 import secret from "../utils/validateEnv";
 import User from "../model/user.model";
+import { IUser } from "../utils/interface/user.interface";
 
 class UtilsService {
   /**
@@ -29,19 +33,6 @@ class UtilsService {
   getRoleById = async (el: IRole) => {
     const role = await Role.findOne({ name: el.name }, "_id");
     return role?.id;
-  };
-
-  sendEmail = async () => {
-    //create trasporter
-    const createTransport = nodemailer.createTransport({
-      host: secret.EMAIL_HOST,
-      port:secret.EMAIL_PORT,
-      auth: { user: secret.EMAIL_USERNAME, pass: "" },
-    });
-
-    //email options
-
-    //send email
   };
 
   authentication: RequestHandler = async (req, res, next) => {
@@ -109,6 +100,10 @@ class UtilsService {
     }
   };
 
+  sendWelcomeEmail = async (user: IUser, password:string) => {
+    await this.sendEmail("welcome", `Welcome to ${secret.APPLICATION}!`, user, password);
+  };
+
   /**
    *
    * @param token token receive from the client
@@ -140,6 +135,55 @@ class UtilsService {
       return decoded;
     } catch (error) {
       next(error);
+    }
+  };
+
+  /**
+   *
+   * @returns nomailer transport
+   */
+  private createTransport = () => {
+    return nodemailer.createTransport({
+      host: secret.EMAIL_HOST,
+      port: secret.EMAIL_PORT,
+      auth: { user: secret.EMAIL_USERNAME, pass: secret.EMAIL_PASSWORD },
+    });
+  };
+
+  /**
+   * send email functionality
+   * @param template
+   * @param subject
+   * @param user
+   */
+  private sendEmail = async (template: string, subject: string, user: IUser, data:any) => {
+    try {
+      const html = pug.renderFile(path.join(__dirname, "..", "..", "views", `${template}.pug`), { subject, user, data });
+      //email options
+      const mailOptions = {
+        from: `Daniels <${secret.EMAIL_SENDER}>`,
+        to: user.email,
+        subject,
+        // html,
+        text: data//convert(html),
+      };
+
+      //send email
+      let tries = 0;
+      const maxTries = 5;
+      while (tries < maxTries) {
+        try {
+          await this.createTransport().sendMail(mailOptions);
+          console.log("Mail sent successfully");
+          break;
+        } catch (error) {
+          console.log(error);
+          tries++;
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      // return error
     }
   };
 }

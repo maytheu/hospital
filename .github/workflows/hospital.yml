@@ -15,6 +15,8 @@ jobs:
       EMAIL_HOST: p;ljk
       EMAIL_PORT: 232
       EMAIL_PASSWORD: lrroe
+      APPLICATION: DataWarehouse Clinic
+      EMAIL_SENDER: info@datawarehouse.com
     strategy:
       matrix:
         node-version: [14.x, 16.x, 18.x]

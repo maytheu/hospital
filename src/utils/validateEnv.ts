@@ -8,7 +8,9 @@ const secret = cleanEnv(process.env, {
   EMAIL_USERNAME: str(),
   EMAIL_HOST: str(),
   EMAIL_PORT: num(),
-  EMAIL_PASSWORD:str()
+  EMAIL_PASSWORD: str(),
+  APPLICATION: str(),
+  EMAIL_SENDER: str(),
 });
 
 export default secret;

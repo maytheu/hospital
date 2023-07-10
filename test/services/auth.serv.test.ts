@@ -18,6 +18,7 @@ const authUrl = "/hospital/api/v1/auth";
 describe("Unit test for auth service", () => {
   let tokenAdmin: string;
   let tokenDoc: string;
+  let tokenPat: string;
   let passwordAdmin: string;
   let passwordDoc: string;
   beforeAll(async () => {
@@ -134,6 +135,10 @@ describe("Unit test for auth service", () => {
       await appRequest.post(`${authUrl}/new`).set("Authorization", `Bearer ${tokenDoc}`).send(newUser).expect(403);
     });
 
+    it("Should create patient", async () => {
+      await appRequest.post(`${authUrl}/new`).set("Authorization", `Bearer ${tokenAdmin}`).send(newUser).expect(201);
+    });
+
     it("Should return 422 reponse", async () => {
       await appRequest.post(`${authUrl}/login`).send({ email: "test@mato", password: "!Pass123" }).expect(422);
     });
@@ -144,6 +149,15 @@ describe("Unit test for auth service", () => {
 
     it("should return user profile with 200", async () => {
       await appRequest.get(`${authUrl}/me`).set("Authorization", `Bearer ${tokenAdmin}`).expect(200);
+    });
+
+    it("Should return 200 reponse for patient login and token", async () => {
+      const resp = await appRequest
+        .post(`${authUrl}/login`)
+        .send({ email: "testdoc@adetunjim.com", password: passwordDoc })
+        .expect(200);
+      tokenPat = resp.body.data.token;
+      expect(tokenDoc.split(".").length).toBe(3);
     });
 
     it("should update to new password with 200", async () => {
@@ -184,6 +198,47 @@ describe("Unit test for auth service", () => {
         .set("Authorization", `Bearer ${tokenAdmin}`)
         .send({ email: "me@mato.com", password: "updated address" })
         .expect(422);
+    });
+  });
+
+  describe("handle lab routes", () => {
+    const labUrl = "/hospital/api/v1/lab";
+    let labId: string;
+    const newLab = { name: "DNA test", description: "", email: "me@adetunjim.com" };
+    const newLabError = { name: "DNA test", description: "", email: "meto@adetunjim.com" };
+
+    it("Should return 404 when user with incorrect email", async () => {
+      await appRequest.post(`${labUrl}/new`).set("Authorization", `Bearer ${tokenDoc}`).send(newLabError).expect(404);
+    });
+
+    it("Should return forbidden since patient cannot create lab", async () => {
+      await appRequest.post(`${labUrl}/new`).set("Authorization", `Bearer ${tokenPat}`).send(newLab).expect(403);
+    });
+
+    it("should create new lab", async () => {
+      const resp = await appRequest
+        .post(`${labUrl}/new`)
+        .set("Authorization", `Bearer ${tokenDoc}`)
+        .send(newLab)
+        .expect(201);
+      labId = resp.body.data.id;
+    });
+
+    it("Should return all lab", async () => {
+      const resp = await appRequest.get(`${labUrl}`).set("Authorization", `Bearer ${tokenPat}`).expect(200);
+      expect(resp.body.data.length).toBe(1);
+    });
+
+    it("Should only return data for authorized user", async () => {
+      await appRequest.get(`${labUrl}/${labId}`).set("Authorization", `Bearer ${tokenPat}`).expect(200);
+    });
+
+    it("Should update lab with result", async () => {
+      await appRequest
+        .put(`${labUrl}/update/${labId}`)
+        .set("Authorization", `Bearer ${tokenDoc}`)
+        .send({ result: "AA" })
+        .expect(200);
     });
   });
 });

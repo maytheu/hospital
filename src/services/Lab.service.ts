@@ -51,13 +51,13 @@ class LabService {
       //make query
       if (role?.name === "Admin") {
         //load all labs for admin
-        labs = Lab.find(labQuery, "-_id");
+        labs = Lab.find(labQuery, "-_id -__v");
       } else if (role?.name === "Patient") {
         labQuery.patientId = user.id;
-        labs = Lab.find(labQuery, "-_id");
+        labs = Lab.find(labQuery, "-_id -__v");
       } else {
         labQuery.conductedBy = user.id;
-        labs = Lab.find(labQuery, "-_id");
+        labs = Lab.find(labQuery, "-_id -__v");
       }
 
       //sorting
@@ -74,8 +74,8 @@ class LabService {
 
       //make query
       const allLabs = await labs
-        .populate({ path: "patientId", select: "name" })
-        .populate({ path: "conductedBy", select: "name" });
+        .populate({ path: "patientId", select: "fullname" })
+        .populate({ path: "conductedBy", select: "fullname" });
 
       return { data: allLabs, count: allLabs.length, page: labPage };
     } catch (error) {
@@ -88,10 +88,15 @@ class LabService {
       if (!mongoose.isValidObjectId(labId)) return notFoundError("Resource");
       const role = await Role.findById(roleId, "name");
       if (role?.name === "Admin" || role?.name === "Doctor") {
-        return await Lab.findById(labId);
+        return await Lab.findById(labId, "-__v")
+          .populate({ path: "conductedBy", select: "fullname" })
+          .populate({ path: "patientId", select: "fullname" });
       }
       if (role?.name === "Nurse") return forbiddenError();
-      return await Lab.findOne({ _id: labId, patientId: id });
+      return await Lab.findOne({ _id: labId, patientId: id }, "-__v").populate({
+        path: "conductedBy",
+        select: "fullname",
+      });
     } catch (error) {
       return error;
     }
@@ -105,7 +110,7 @@ class LabService {
    */
   newlab = async (data: ILaboratoryNewData, id: any): Promise<any> => {
     try {
-      const user = await User.findOne({ email: data.email }, "fullname");
+      const user = await User.findOne({ email: data.email }, "fullname id");
       if (!user) return notFoundError("Patient");
 
       const labData: ILaboratory = {

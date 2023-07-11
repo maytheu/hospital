@@ -9,6 +9,7 @@ const medicationSchema = new Schema<IMedicaton>(
     drugsAndDosage: { type: String, required: [true, "drugsAndDosage is required"] },
     duration: { type: String, required: [true, "duration is required"] },
     frequency: { type: String, required: [true, "frequency is required"] },
+    conductedBy: { type: Types.ObjectId, ref: "user" },
   },
   {
     timestamps: true,

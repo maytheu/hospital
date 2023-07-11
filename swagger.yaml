@@ -14,6 +14,8 @@ tags:
     description: authentication and authorization
   - name: lab
     description: view lab result
+  - name: medication
+    description: Patients medication history
 
 paths:
   /auth/login:
@@ -345,6 +347,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Unauthenticated"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthorized"
         "500":
           description: Error
           content:
@@ -432,7 +440,7 @@ paths:
           schema:
             type: string
       requestBody:
-        description: new test
+        description: nupdateew test
         required: true
         content:
           application/json:
@@ -451,6 +459,266 @@ paths:
                     example: Lab result updated
                   data:
                     $ref: "#/components/schemas/LaboratoryUpdateData"
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthorized"
+        "404":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Validation"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /medication:
+    get:
+      tags:
+        - medication
+      security:
+        - bearerAuth: []
+      description: Patients medication history
+      summary: Retrive patients medications
+      operationId: medications
+      parameters:
+        - name: treatment
+          in: query
+          description: Medication name
+          schema:
+            type: string
+        - name: duration
+          in: query
+          description: search by medication duration
+          schema:
+            type: string
+        - name: frequency
+          in: query
+          description: Search by frequency
+          schema:
+            type: string
+        - name: drugs
+          in: query
+          description: search by drugs and dosage
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: sort response, seperate multiple sort list with comma
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: search page
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: number of response per page
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      medication:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Medication"
+                      count:
+                        type: number
+                      page:
+                        type: number
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /medication/{medId}:
+    get:
+      description: get medication details
+      summary: Medication details
+      tags:
+        - medication
+      security:
+        - bearerAuth: []
+      operationId: medication
+      parameters:
+        - name: medId
+          in: path
+          description: Medication id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Medication"
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthorized"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /medication/new:
+    post:
+      tags:
+        - medication
+      security:
+        - bearerAuth: []
+      description: New medication
+      summary: Create new medication for patients
+      operationId: newMedication
+      requestBody:
+        description: All field are required
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MedicationNew"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Lab data created
+                  data:
+                    type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          treatment:
+                            type: string
+                          medId:
+                            type: string
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthorized"
+        "404":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Validation"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /medication/update/{medId}:
+    put:
+      tags:
+        - medication
+      summary: update patient Medication
+      operationId: updateMedication
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: medId
+          in: path
+          description: Medication id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: update medication
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MedicationUpdate"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Lab result updated
+                  data:
+                    $ref: "#/components/schemas/MedicationUpdate"
         "401":
           description: Unauthenticated
           content:
@@ -519,7 +787,10 @@ components:
         result:
           type: string
         conductedBy:
-          type: string
+          type: object
+          properties:
+            fullname:
+              type: string
 
     LaboratoryNewData:
       type: object
@@ -543,6 +814,49 @@ components:
         description:
           type: string
         result:
+          type: string
+
+    Medication:
+      type: object
+      properties:
+        treatment:
+          type: string
+        drugsAndDosage:
+          type: string
+        duration:
+          type: string
+        frequency:
+          type: string
+        conductedBy:
+          type: object
+          properties:
+            fullname:
+              type: string
+
+    MedicationNew:
+      type: object
+      properties:
+        treatment:
+          type: string
+        drugsAndDosage:
+          type: string
+        duration:
+          type: string
+        frequency:
+          type: string
+        email:
+          type: string
+
+    MedicationUpdate:
+      type: object
+      properties:
+        treatment:
+          type: string
+        drugsAndDosage:
+          type: string
+        duration:
+          type: string
+        frequency:
           type: string
 
     NotFound:

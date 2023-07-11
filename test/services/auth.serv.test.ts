@@ -19,8 +19,11 @@ describe("Unit test for auth service", () => {
   let tokenAdmin: string;
   let tokenDoc: string;
   let tokenPat: string;
+  let tokenNur: string;
   let passwordAdmin: string;
   let passwordDoc: string;
+  let passwordNur: string;
+  let passwordPat: string;
   beforeAll(async () => {
     await Db.connectMongo();
     await Db.syncRole();
@@ -77,11 +80,31 @@ describe("Unit test for auth service", () => {
       role: "Doctor",
     };
 
+    const newUser: ICreateNewUser = {
+      fullname: "test ok",
+      dateOfBirth: new Date("2004-11-12"),
+      role: "Patient",
+      email: "me@adetunjim.com",
+      phone: "+123454231526",
+    };
+
+    const nurseUser: ICreateNewUser = {
+      fullname: "test nurse",
+      dateOfBirth: new Date("2004-11-12"),
+      role: "Nurse",
+      email: "nurse@adetunjim.com",
+      phone: "+123454231524",
+    };
+
     beforeAll(async () => {
       const data = await AuthService.createUser(userAdmin);
       const dataDoc = await AuthService.createUser(userDoc);
+      const dataPat = await AuthService.createUser(newUser);
+      const dataNur = await AuthService.createUser(nurseUser);
       passwordAdmin = data.password;
       passwordDoc = dataDoc.password;
+      passwordPat = dataPat.password;
+      passwordNur=dataNur.password
     });
 
     it("Should return token", async () => {
@@ -135,8 +158,8 @@ describe("Unit test for auth service", () => {
       await appRequest.post(`${authUrl}/new`).set("Authorization", `Bearer ${tokenDoc}`).send(newUser).expect(403);
     });
 
-    it("Should create patient", async () => {
-      await appRequest.post(`${authUrl}/new`).set("Authorization", `Bearer ${tokenAdmin}`).send(newUser).expect(201);
+    it("Should not create patient since patient is already created", async () => {
+      await appRequest.post(`${authUrl}/new`).set("Authorization", `Bearer ${tokenAdmin}`).send(newUser).expect(500);
     });
 
     it("Should return 422 reponse", async () => {
@@ -154,10 +177,10 @@ describe("Unit test for auth service", () => {
     it("Should return 200 reponse for patient login and token", async () => {
       const resp = await appRequest
         .post(`${authUrl}/login`)
-        .send({ email: "testdoc@adetunjim.com", password: passwordDoc })
+        .send({ email: "me@adetunjim.com", password: passwordPat })
         .expect(200);
       tokenPat = resp.body.data.token;
-      expect(tokenDoc.split(".").length).toBe(3);
+      expect(tokenPat.split(".").length).toBe(3);
     });
 
     it("should update to new password with 200", async () => {
@@ -199,6 +222,15 @@ describe("Unit test for auth service", () => {
         .send({ email: "me@mato.com", password: "updated address" })
         .expect(422);
     });
+
+    it("Should return 200 reponse for nunrse login and token", async () => {
+      const resp = await appRequest
+        .post(`${authUrl}/login`)
+        .send({ email: "nurse@adetunjim.com", password: passwordNur })
+        .expect(200);
+      tokenNur = resp.body.data.token;
+      expect(tokenNur.split(".").length).toBe(3);
+    });
   });
 
   describe("handle lab routes", () => {
@@ -226,11 +258,19 @@ describe("Unit test for auth service", () => {
 
     it("Should return all lab", async () => {
       const resp = await appRequest.get(`${labUrl}`).set("Authorization", `Bearer ${tokenPat}`).expect(200);
-      expect(resp.body.data.length).toBe(1);
+      expect(resp.body.data.count).toBe(1);
     });
 
     it("Should only return data for authorized user", async () => {
       await appRequest.get(`${labUrl}/${labId}`).set("Authorization", `Bearer ${tokenPat}`).expect(200);
+    });
+
+    it("Should be forbidden sice nurse cannt access patient lab", async () => {
+      await appRequest.get(`${labUrl}/${labId}`).set("Authorization", `Bearer ${tokenNur}`).expect(403);
+    });
+
+    it("Should be return patint result to doctor or admin", async () => {
+      await appRequest.get(`${labUrl}/${labId}`).set("Authorization", `Bearer ${tokenDoc}`).expect(200);
     });
 
     it("Should update lab with result", async () => {
@@ -239,6 +279,30 @@ describe("Unit test for auth service", () => {
         .set("Authorization", `Bearer ${tokenDoc}`)
         .send({ result: "AA" })
         .expect(200);
+    });
+
+    it("Should return 404 since only the user that create can update", async () => {
+      await appRequest
+        .put(`${labUrl}/update/${labId}`)
+        .set("Authorization", `Bearer ${tokenNur}`)
+        .send({ result: "AA" })
+        .expect(404);
+    });
+
+    it("Should update lab since its an admin", async () => {
+      await appRequest
+        .put(`${labUrl}/update/${labId}`)
+        .set("Authorization", `Bearer ${tokenAdmin}`)
+        .send({ result: "AB" })
+        .expect(200);
+    });
+
+    it("Should return 404 for invalid labid", async () => {
+      await appRequest
+        .put(`${labUrl}/update/invalid`)
+        .set("Authorization", `Bearer ${tokenAdmin}`)
+        .send({ result: "AB" })
+        .expect(404);
     });
   });
 });

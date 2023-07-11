@@ -8,7 +8,7 @@ const labSchema = new Schema<ILaboratory>(
     name: { type: String, required: [true, "name is required"] },
     description: String,
     result: String,
-    conductedBy: String,
+    conductedBy: { type: Types.ObjectId, ref: "user" },
   },
   {
     timestamps: true,

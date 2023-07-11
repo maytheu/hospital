@@ -15,6 +15,15 @@ import User from "../model/user.model";
 import { IUser } from "../utils/interface/user.interface";
 
 class UtilsService {
+  private operationMap: any = {
+    ">": "$gt",
+    ">=": "$gte",
+    "<": "$lt",
+    "<=": "$lte",
+    "=": "$eq",
+  };
+
+  private regex = /\b(<|>|>=|=|<|>=)\b/g;
   /**
    *
    * @param el
@@ -37,8 +46,16 @@ class UtilsService {
 
   authentication: RequestHandler = async (req, res, next) => {
     try {
-      const payload: any = await this.retrieveToken(req, res, next);
-      const user = await User.findById(payload.user, "-password -createdAt -updatedAt");
+      const header = req.headers.authorization;
+      if (!header || !header.startsWith("Bearer")) return next(unauthenticatedError());
+
+      const token = header.split(" ")[1];
+      if (!token) return next(unauthenticatedError());
+
+      const decoded: any = await this.verifyToken(token, secret.JWTSIGN);
+      if (!decoded) return next(unauthenticatedError());
+
+      const user = await User.findById(decoded.user, "-password -createdAt -updatedAt");
       req.user = user!;
       next();
     } catch (error) {
@@ -75,8 +92,8 @@ class UtilsService {
     try {
       const { user } = req;
       const role = await Role.findById(user!.role, "name");
-      if (role!.name !== "Doctor") return next(forbiddenError());
-      return next();
+      if (role!.name === "Doctor" || role?.name === "Admin") return next();
+      return next(forbiddenError());
     } catch (error) {
       next(error);
     }
@@ -100,7 +117,12 @@ class UtilsService {
     }
   };
 
-  sendWelcomeEmail = async (user: IUser, password:string) => {
+  /**
+   *
+   * @param user
+   * @param password
+   */
+  sendWelcomeEmail = async (user: IUser, password: string) => {
     await this.sendEmail("welcome", `Welcome to ${secret.APPLICATION}!`, user, password);
   };
 
@@ -156,16 +178,20 @@ class UtilsService {
    * @param subject
    * @param user
    */
-  private sendEmail = async (template: string, subject: string, user: IUser, data:any) => {
+  private sendEmail = async (template: string, subject: string, user: IUser, data: any) => {
     try {
-      const html = pug.renderFile(path.join(__dirname, "..", "..", "views", `${template}.pug`), { subject, user, data });
+      const html = pug.renderFile(path.join(__dirname, "..", "..", "views", `${template}.pug`), {
+        subject,
+        user,
+        data,
+      });
       //email options
       const mailOptions = {
         from: `Daniels <${secret.EMAIL_SENDER}>`,
         to: user.email,
         subject,
         // html,
-        text: data//convert(html),
+        text: data, //convert(html),
       };
 
       //send email

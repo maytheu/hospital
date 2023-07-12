@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 
 import Api from "./Api";
-import { IMedicatonNewData } from "../utils/interface/medication.interface";
+import { IMedicatonNewData, IMedicatonUpdateData } from "../utils/interface/medication.interface";
 import { validationError } from "../services/error";
 import MedicalService from "../services/Med.service";
 import AppError from "../utils/AppError";
@@ -24,7 +24,10 @@ class MedicalController extends Api {
 
   medicals: RequestHandler = async (req, res, next) => {
     try {
-      this.sendResp(res, "", {});
+      const data = await MedicalService.medicals(req);
+      if (data instanceof AppError || data instanceof Error) return next(data);
+
+      this.sendResp(res, `Medical eport fetched`, data);
     } catch (error) {
       next(error);
     }
@@ -47,7 +50,17 @@ class MedicalController extends Api {
 
   updateMedical: RequestHandler = async (req, res, next) => {
     try {
-      this.sendResp(res, "", {});
+      const d = IMedicatonUpdateData.safeParse(req.body);
+      if (!d.success) return next(validationError(d.error));
+
+      const {
+        params: { medId },
+        user,
+      } = req;
+      const data = await MedicalService.updateMedical(medId, req.body, user);
+      if (data instanceof AppError || data instanceof Error) return next(data);
+
+      this.sendResp(res, "", req.body);
     } catch (error) {
       next(error);
     }

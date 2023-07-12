@@ -388,8 +388,13 @@ describe("Unit test for auth service", () => {
     });
 
     it("Should return all medical report", async () => {
-      const resp = appRequest.get(medUrl).set("Authorization", `Bearer ${tokenAdmin}`).expect(200);
-      expect((await resp).body.data.count).toBe(2);
+      const resp = await appRequest.get(medUrl).set("Authorization", `Bearer ${tokenAdmin}`).expect(200);
+      expect(resp.body.data.count).toBe(2);
+    });
+
+    it("Should return all patient medical report", async () => {
+      const resp = await appRequest.get(medUrl).set("Authorization", `Bearer ${tokenPat}`).expect(200);
+      expect(resp.body.data.count).toBe(1);
     });
 
     it("should be only be updated by the user that create", async () => {
@@ -398,7 +403,7 @@ describe("Unit test for auth service", () => {
         .set("Authorization", `Bearer ${tokenNur}`)
         .send({ frequency: "3" })
         .expect(200);
-      expect((await resp).body.data.frequency).toBe("3");
+      expect(resp.body.data.frequency).toBe("3");
     });
 
     it("doctor and admin should be able to update report created by nurse", async () => {
@@ -407,7 +412,7 @@ describe("Unit test for auth service", () => {
         .set("Authorization", `Bearer ${tokenDoc}`)
         .send({ duration: "3" })
         .expect(200);
-      expect((await resp).body.data.duration).toBe("3");
+      expect(resp.body.data.duration).toBe("3");
     });
 
     it("should not be able to update report created by doctor", async () => {

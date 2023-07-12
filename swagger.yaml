@@ -535,6 +535,11 @@ paths:
           description: number of response per page
           schema:
             type: number
+        - name: admin
+          in: query
+          description: check medical report that a nurse or doctor conduct
+          schema:
+            type: boolean
       responses:
         "200":
           description: Ok

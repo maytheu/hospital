@@ -11,22 +11,8 @@ import {
 } from "../utils/interface/laboratory.interface";
 import User from "../model/user.model";
 import { forbiddenError, notFoundError } from "./error";
+import { LabObj } from "../utils/interface/utils.interface";
 
-interface LabObj {
-  name: QueryOptions;
-  result: QueryOptions;
-  description: QueryOptions;
-  sort: string;
-  page: string;
-  limit: string;
-  patient: string;
-  conductedBy: string;
-}
-
-interface QueryOptions {
-  $regex: string;
-  $options: string;
-}
 
 class LabService {
   /**

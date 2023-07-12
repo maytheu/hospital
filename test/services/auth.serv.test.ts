@@ -10,6 +10,7 @@ import secret from "../../src/utils/validateEnv";
 import { ICreateNewUser } from "../../src/utils/interface/user.interface";
 
 import App from "../../src/App";
+import { IMedicatonNewData } from "../../src/utils/interface/medication.interface";
 
 const app = App.app;
 const appRequest = request(app);
@@ -104,7 +105,7 @@ describe("Unit test for auth service", () => {
       passwordAdmin = data.password;
       passwordDoc = dataDoc.password;
       passwordPat = dataPat.password;
-      passwordNur=dataNur.password
+      passwordNur = dataNur.password;
     });
 
     it("Should return token", async () => {
@@ -303,6 +304,109 @@ describe("Unit test for auth service", () => {
         .set("Authorization", `Bearer ${tokenAdmin}`)
         .send({ result: "AB" })
         .expect(404);
+    });
+  });
+
+  describe("Should handle medical request", () => {
+    let medId: string;
+    let medNurId: string;
+    const medUrl = "/hospital/api/v1/medical";
+    const medData: IMedicatonNewData = {
+      treatment: "what",
+      drugsAndDosage: "2/day",
+      duration: "1",
+      frequency: "2",
+      email: "me@adetunjim.com",
+    };
+    const medDataE = {
+      treatment: "what",
+      drugsAndDosage: "2/day",
+      duration: "1",
+      frequency: "2",
+    };
+    const medDataEmail: IMedicatonNewData = {
+      treatment: "what",
+      drugsAndDosage: "2/day",
+      duration: "1",
+      frequency: "2",
+      email: "err@adetunjim.com",
+    };
+    const medDataNu: IMedicatonNewData = {
+      treatment: "what nurse",
+      drugsAndDosage: "2/day",
+      duration: "1",
+      frequency: "2",
+      email: "nurse@adetunjim.com",
+    };
+    it("Should return 401 since not token is passed", async () => {
+      await appRequest.get(medUrl).expect(401);
+    });
+
+    it("Should return 422 for bad data", async () => {
+      await appRequest.post(`${medUrl}/new`).set("Authorization", `Bearer ${tokenAdmin}`).send(medDataE).expect(422);
+    });
+
+    it("should return 404 for invalid patient", async () => {
+      await appRequest.post(`${medUrl}/new`).set("Authorization", `Bearer ${tokenDoc}`).send(medDataEmail).expect(404);
+    });
+
+    it("should create new medical report", async () => {
+      const resp = await appRequest
+        .post(`${medUrl}/new`)
+        .set("Authorization", `Bearer ${tokenDoc}`)
+        .send(medData)
+        .expect(201);
+      medId = resp.body.data.id;
+    });
+
+    it("should create new medical report for nurse", async () => {
+      const resp = await appRequest
+        .post(`${medUrl}/new`)
+        .set("Authorization", `Bearer ${tokenNur}`)
+        .send(medDataNu)
+        .expect(201);
+      medNurId = resp.body.data.id;
+    });
+
+    it("should return 404, since its invallid id", async () => {
+      await appRequest.get(`${medUrl}/invalid`).set("Authorization", `Bearer ${tokenPat}`).expect(404);
+    });
+
+    it("should restrict from nurse", async () => {
+      await appRequest.get(`${medUrl}/${medId}`).set("Authorization", `Bearer ${tokenPat}`).expect(403);
+    });
+
+    it("should return data for nurse, since its nurse that is the patient", async () => {
+      await appRequest.get(`${medUrl}/${medNurId}`).set("Authorization", `Bearer ${tokenNur}`).expect(403);
+    });
+
+    it("Should return all medical report", async () => {
+      const resp = appRequest.get(medUrl).set("Authorization", `Bearer ${tokenAdmin}`).expect(200);
+      expect((await resp).body.data.count).toBe(2);
+    });
+
+    it("should be only be updated by the user that create", async () => {
+      appRequest
+        .put(`${medUrl}/update/${medNurId}`)
+        .set("Authorization", `Bearer ${tokenNur}`)
+        .send({ frequency: "3" })
+        .expect(200);
+    });
+
+    it("doctor and admin should be able to update report created by nurse", async () => {
+      appRequest
+        .put(`${medUrl}/update/${medNurId}`)
+        .set("Authorization", `Bearer ${tokenDoc}`)
+        .send({ duration: "3" })
+        .expect(200);
+    });
+
+    it("should not be able to update report created by doctor", async () => {
+      appRequest
+        .put(`${medUrl}/update/${medId}`)
+        .set("Authorization", `Bearer ${tokenNur}`)
+        .send({ duration: "3" })
+        .expect(403);
     });
   });
 });

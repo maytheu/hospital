@@ -4,7 +4,7 @@ import { IProgress } from "../utils/interface/progress.interface";
 
 const progressSchema = new Schema<IProgress>(
   {
-    patientId: { type: Types.ObjectId, ref: "user" },
+    patient: { type: Types.ObjectId, ref: "user" },
     note: { type: String, required: [true, "note is required"] },
   },
   {

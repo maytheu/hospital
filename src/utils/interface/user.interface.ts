@@ -24,7 +24,7 @@ const ICreateNewUser = z
   .strict();
 
 const IUserId = z.object({
-  patientId: z.custom<mongoose.Schema.Types.ObjectId>(),
+  patient: z.custom<mongoose.Schema.Types.ObjectId>(),
 });
 
 const IUserData = z.object({

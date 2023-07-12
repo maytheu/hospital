@@ -4,7 +4,7 @@ import { ISurgery } from "../utils/interface/surgery.interface";
 
 const surgerySchema = new Schema<ISurgery>(
   {
-    patientId: { type: Types.ObjectId, ref: "user" },
+    patient: { type: Types.ObjectId, ref: "user" },
     name: { type: String, required: [true, "Name is required"] },
     procedure: { type: String, required: [true, "procedure is required"] },
     result: String,

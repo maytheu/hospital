@@ -19,7 +19,7 @@ interface LabObj {
   sort: string;
   page: string;
   limit: string;
-  patientId: string;
+  patient: string;
   conductedBy: string;
 }
 
@@ -53,7 +53,7 @@ class LabService {
         //load all labs for admin
         labs = Lab.find(labQuery, "-_id -__v");
       } else if (role?.name === "Patient") {
-        labQuery.patientId = user.id;
+        labQuery.patient = user.id;
         labs = Lab.find(labQuery, "-_id -__v");
       } else {
         labQuery.conductedBy = user.id;
@@ -74,7 +74,7 @@ class LabService {
 
       //make query
       const allLabs = await labs
-        .populate({ path: "patientId", select: "fullname" })
+        .populate({ path: "patient", select: "fullname" })
         .populate({ path: "conductedBy", select: "fullname" });
 
       return { data: allLabs, count: allLabs.length, page: labPage };
@@ -90,7 +90,7 @@ class LabService {
       if (role?.name === "Admin" || role?.name === "Doctor") {
         return await Lab.findById(labId, "-__v")
           .populate({ path: "conductedBy", select: "fullname" })
-          .populate({ path: "patientId", select: "fullname" });
+          .populate({ path: "patient", select: "fullname" });
       }
       if (role?.name === "Nurse") return forbiddenError();
       return await Lab.findOne({ _id: labId, patientId: id }, "-__v").populate({
@@ -114,7 +114,7 @@ class LabService {
       if (!user) return notFoundError("Patient");
 
       const labData: ILaboratory = {
-        patientId: user.id,
+        patient: user.id,
         conductedBy: id,
         name: data.name,
         description: data.description,

@@ -4,7 +4,7 @@ import { IMedicaton } from "../utils/interface/medication.interface";
 
 const medicationSchema = new Schema<IMedicaton>(
   {
-    patientId: { type: Types.ObjectId, ref: "user" },
+    patient: { type: Types.ObjectId, ref: "user" },
     treatment: { type: String, required: [true, "treatment is required"] },
     drugsAndDosage: { type: String, required: [true, "drugsAndDosage is required"] },
     duration: { type: String, required: [true, "duration is required"] },

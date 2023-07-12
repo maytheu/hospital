@@ -257,17 +257,22 @@ describe("Unit test for auth service", () => {
       labId = resp.body.data.id;
     });
 
-    it("Should return all lab", async () => {
-      const resp = await appRequest.get(`${labUrl}`).set("Authorization", `Bearer ${tokenPat}`).expect(200);
-      expect(resp.body.data.count).toBe(1);
-    });
-
     it("Should only return data for authorized user", async () => {
       await appRequest.get(`${labUrl}/${labId}`).set("Authorization", `Bearer ${tokenPat}`).expect(200);
     });
 
     it("Should be forbidden sice nurse cannt access patient lab", async () => {
       await appRequest.get(`${labUrl}/${labId}`).set("Authorization", `Bearer ${tokenNur}`).expect(403);
+    });
+
+    it("Should return all lab", async () => {
+      const resp = await appRequest.get(`${labUrl}`).set("Authorization", `Bearer ${tokenPat}`).expect(200);
+      expect(resp.body.data.count).toBe(1);
+    });
+
+    it("Should not return data for nurse", async () => {
+      const resp = await appRequest.get(`${labUrl}`).set("Authorization", `Bearer ${tokenNur}`).expect(200);
+      expect(resp.body.data.count).toBe(0);
     });
 
     it("Should be return patint result to doctor or admin", async () => {
@@ -356,7 +361,7 @@ describe("Unit test for auth service", () => {
         .set("Authorization", `Bearer ${tokenDoc}`)
         .send(medData)
         .expect(201);
-      medId = resp.body.data.id;
+      medId = resp.body.data.medId;
     });
 
     it("should create new medical report for nurse", async () => {
@@ -365,19 +370,21 @@ describe("Unit test for auth service", () => {
         .set("Authorization", `Bearer ${tokenNur}`)
         .send(medDataNu)
         .expect(201);
-      medNurId = resp.body.data.id;
+      medNurId = resp.body.data.medId;
     });
 
     it("should return 404, since its invallid id", async () => {
       await appRequest.get(`${medUrl}/invalid`).set("Authorization", `Bearer ${tokenPat}`).expect(404);
     });
 
-    it("should restrict from nurse", async () => {
-      await appRequest.get(`${medUrl}/${medId}`).set("Authorization", `Bearer ${tokenPat}`).expect(403);
+    it("should restrict from nurse with no eentry", async () => {
+      const resp = await appRequest.get(`${medUrl}/${medId}`).set("Authorization", `Bearer ${tokenNur}`).expect(200);
+      expect(resp.body.data).toBeNull();
     });
 
     it("should return data for nurse, since its nurse that is the patient", async () => {
-      await appRequest.get(`${medUrl}/${medNurId}`).set("Authorization", `Bearer ${tokenNur}`).expect(403);
+      const resp = await appRequest.get(`${medUrl}/${medNurId}`).set("Authorization", `Bearer ${tokenNur}`).expect(200);
+      expect(resp.body.data.treatment).toBe(medDataNu.treatment);
     });
 
     it("Should return all medical report", async () => {
@@ -386,23 +393,25 @@ describe("Unit test for auth service", () => {
     });
 
     it("should be only be updated by the user that create", async () => {
-      appRequest
+      const resp = await appRequest
         .put(`${medUrl}/update/${medNurId}`)
         .set("Authorization", `Bearer ${tokenNur}`)
         .send({ frequency: "3" })
         .expect(200);
+      expect((await resp).body.data.frequency).toBe("3");
     });
 
     it("doctor and admin should be able to update report created by nurse", async () => {
-      appRequest
+      const resp = await appRequest
         .put(`${medUrl}/update/${medNurId}`)
         .set("Authorization", `Bearer ${tokenDoc}`)
         .send({ duration: "3" })
         .expect(200);
+      expect((await resp).body.data.duration).toBe("3");
     });
 
     it("should not be able to update report created by doctor", async () => {
-      appRequest
+      await appRequest
         .put(`${medUrl}/update/${medId}`)
         .set("Authorization", `Bearer ${tokenNur}`)
         .send({ duration: "3" })

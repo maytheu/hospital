@@ -4,7 +4,7 @@ import { ILaboratory } from "../utils/interface/laboratory.interface";
 
 const labSchema = new Schema<ILaboratory>(
   {
-    patientId: { type: Types.ObjectId, ref: "user" },
+    patient: { type: Types.ObjectId, ref: "user" },
     name: { type: String, required: [true, "name is required"] },
     description: String,
     result: String,

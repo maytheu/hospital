@@ -76,7 +76,7 @@ class MedicalService {
       const allReports = await meds.populate({ path: "conductedBy", select: "fullname" });
       return {
         report: allReports,
-        user: { name: userData.fullname, email: userData.email },
+        patient: { name: userData.fullname, email: userData.email },
         count: medCount,
         page: medPage,
         limit: medLimit,

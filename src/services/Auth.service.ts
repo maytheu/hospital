@@ -4,21 +4,25 @@ import jwt from "jsonwebtoken";
 import { ICreateNewUser, IPasswordChange, IUpdateProfile, IUser, IUserLogin } from "../utils/interface/user.interface";
 import UtilsService from "./Utils.service";
 import User from "../model/user.model";
-import { forbiddenError, notFoundError, unauthenticatedError } from "./error";
+import { duplcateError, forbiddenError, notFoundError, unauthenticatedError } from "./error";
 import secret from "../utils/validateEnv";
 
 class AuthService {
-  createUser = async (user: ICreateNewUser): Promise<{ data: any; password: string }> => {
+  createUser = async (user: ICreateNewUser): Promise<any> => {
     try {
       //generate random password
       const password = this.genPass();
       //encrpy password
       const hash = await this.encryptPassword(password);
 
+      //check if user exist
+      const checUser = await User.findOne({ email: user.email });
+      if (checUser) return duplcateError("Patient");
+
       //fetch status and role id
       const [status, role] = await Promise.all([
         UtilsService.getStatusId({ name: "Active" }),
-        UtilsService.getRoleById({ name: user.role }),
+        UtilsService.getRoleById({ name: user.role || "Patient" }),
       ]);
       //save
       const createUser: IUser = { ...user, password: hash, status, role: role };

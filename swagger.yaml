@@ -102,7 +102,7 @@ paths:
       tags:
         - auth
       summary: create new patient, doctors and nurse, doctors and nurse can only create new patients, only assign doctors can create doctors/nurse
-      description: create new user based on authorization level
+      description: create new user based to create doctors/nurse
       operationId: newUser
       security:
         - bearerAuth: []
@@ -113,6 +113,70 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/UserData"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Please check your email to confirm ur login
+                  data:
+                    type: object
+                    properties:
+                      data:
+                        type: string
+                        example: Account created
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthorized"
+        "409":
+          description: Duplicate User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Duplicate"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Validation"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/request:
+    post:
+      tags:
+        - auth
+      summary: A patient can create a new account, password is sent to thier mail
+      description: create new user based
+      operationId: newUserRequest
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Create new user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserDataRequest"
       responses:
         "201":
           description: Created
@@ -280,6 +344,37 @@ paths:
         - bearerAuth: []
       description: Load all patient lab result
       operationId: labs
+      parameters:
+        - name: name
+          in: query
+          description: Lab name
+          schema:
+            type: string
+        - name: description
+          in: query
+          description: search by lab description
+          schema:
+            type: string
+        - name: result
+          in: query
+          description: Search by result
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: sort response, seperate multiple sort list with comma
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: search page
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: number of response per page
+          schema:
+            type: number
       responses:
         "200":
           description: Ok
@@ -490,7 +585,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /medication:
+  /medical:
     get:
       tags:
         - medication
@@ -574,7 +669,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /medication/{medId}:
+  /medical/{medId}:
     get:
       description: get medication details
       summary: Medication details
@@ -621,7 +716,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /medication/new:
+  /medical/new:
     post:
       tags:
         - medication
@@ -689,7 +784,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /medication/update/{medId}:
+  /medical/update/{medId}:
     put:
       tags:
         - medication
@@ -919,6 +1014,22 @@ components:
         role:
           type: string
           example: Admin | Doctor | Nurse | Patient
+
+    UserDataRequest:
+      type: object
+      properties:
+        fullname:
+          type: string
+          example: patient one
+        email:
+          type: string
+          example: test@adetunjim.com
+        dateOfBirth:
+          type: string
+          example: "2001-06-06"
+        phone:
+          type: string
+          example: "+23410121389781"
 
     Validation:
       type: object

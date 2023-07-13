@@ -37,13 +37,13 @@ class LabService {
       //make query
       if (role?.name === "Admin") {
         //load all labs for admin
-        labs = Lab.find(labQuery, "-_id -__v");
+        labs = Lab.find(labQuery, "-__v");
       } else if (role?.name === "Patient") {
         labQuery.patient = user.id;
-        labs = Lab.find(labQuery, "-_id -__v");
+        labs = Lab.find(labQuery, "-__v");
       } else {
         labQuery.conductedBy = user.id;
-        labs = Lab.find(labQuery, "-_id -__v");
+        labs = Lab.find(labQuery, "-__v");
       }
 
       //sorting

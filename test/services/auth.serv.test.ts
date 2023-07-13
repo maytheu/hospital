@@ -137,7 +137,6 @@ describe("Unit test for auth service", () => {
     const newUser = {
       fullname: "test ok",
       dateOfBirth: "2004-11-12",
-      role: "Patient",
       email: "me@adetunjim.com",
       phone: "+123454231526",
     };
@@ -160,7 +159,7 @@ describe("Unit test for auth service", () => {
     });
 
     it("Should not create patient since patient is already created", async () => {
-      await appRequest.post(`${authUrl}/new`).set("Authorization", `Bearer ${tokenAdmin}`).send(newUser).expect(500);
+      await appRequest.post(`${authUrl}/request`).set("Authorization", `Bearer ${tokenAdmin}`).send(newUser).expect(409);
     });
 
     it("Should return 422 reponse", async () => {

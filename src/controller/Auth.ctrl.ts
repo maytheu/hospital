@@ -21,7 +21,7 @@ class Auth extends Api {
       if (!data.success) return next(validationError(data.error));
 
       const resp = await AuthService.createUser(req.body);
-      if (resp.data instanceof Error) return next(resp);
+      if (resp.data instanceof Error||resp instanceof AppError) return next(resp);
 
       this.sendCreatedResp(res, "Account successfully created", { data: resp.data });
     } catch (error) {
@@ -46,11 +46,11 @@ class Auth extends Api {
   profile: RequestHandler = async (req, res, next) => {
     try {
       const { user } = req;
-      const projection = "-patientId -_id";
-      const laboratory = await Lab.find({ patientId: user!.id }, projection);
-      const report = await Progress.find({ patientId: user!.id }, projection);
-      const medication = await Medication.find({ patientId: user!.id }, projection);
-      const surgery = await Surgery.find({ patientId: user!.id }, projection);
+      const projection = "-patient -_id";
+      const laboratory = await Lab.find({ patient: user!.id }, projection);
+      const report = await Progress.find({ patient: user!.id }, projection);
+      const medication = await Medication.find({ patient: user!.id }, projection);
+      const surgery = await Surgery.find({ patient: user!.id }, projection);
       this.sendResp(res, "", { user, laboratory, report, medication, surgery });
     } catch (error) {
       next(error);

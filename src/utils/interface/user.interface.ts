@@ -15,7 +15,7 @@ const IUserLogin = z
 
 const ICreateNewUser = z
   .object({
-    role: z.enum(["Admin", "Doctor", "Nurse", "Patient"]),
+    role: z.enum(["Admin", "Doctor", "Nurse", "Patient"]).optional(),
     fullname: z.string({ invalid_type_error: "string is required", required_error: "userId is required" }),
     dateOfBirth: z.date({ required_error: "must be yyyy-mm-dd format" }),
     phone: z.string().includes("+", { message: "must include country code" }).min(10),

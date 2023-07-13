@@ -78,10 +78,14 @@ export const notFoundError = (error: string) => {
   return new AppError(`${error} not found `, 404);
 };
 
-export const unauthenticatedError = () => {  
- return new AppError("user/password not found", 401);
+export const unauthenticatedError = () => {
+  return new AppError("user/password not found", 401);
 };
 
-export const forbiddenError = () => {  
+export const forbiddenError = () => {
   return new AppError("Not allowed", 403);
- };
+};
+
+export const duplcateError = (err: string) => {
+  return new AppError(`${err} already exist`, 409);
+};

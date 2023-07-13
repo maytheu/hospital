@@ -50,7 +50,7 @@ class AuthService {
       const payload = { user: user.id, role: user.role };
       const token = await this.genToken(payload, secret.JWTSIGN);
 
-      return token;
+      return { token, patient: user.id };
     } catch (error) {
       return error;
     }

@@ -10,11 +10,13 @@ const ISurgeryData = z
     email: z.string().email(),
     result: z.string().optional(),
     description: z.string().optional(),
+    conductedBy:z.custom<mongoose.Schema.Types.ObjectId>().optional()
   })
   .strict();
 
 const ISurgery = ISurgeryData.merge(IUserId);
 
 type ISurgery = z.infer<typeof ISurgery>;
+type ISurgeryData = z.infer<typeof ISurgeryData>;
 
-export { ISurgery };
+export { ISurgery, ISurgeryData };

@@ -21,7 +21,7 @@ class Auth extends Api {
       if (!data.success) return next(validationError(data.error));
 
       const resp = await AuthService.createUser(req.body);
-      if (resp.data instanceof Error||resp instanceof AppError) return next(resp);
+      if (resp.data instanceof Error || resp instanceof AppError) return next(resp);
 
       this.sendCreatedResp(res, "Account successfully created", { data: resp.data });
     } catch (error) {
@@ -37,7 +37,7 @@ class Auth extends Api {
       const token = await AuthService.login(req.body);
       if (token instanceof AppError || token instanceof Error) return next(token);
 
-      this.sendResp(res, "login successful", { token });
+      this.sendResp(res, "login successful", token);
     } catch (error) {
       next(error);
     }

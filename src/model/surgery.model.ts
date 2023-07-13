@@ -7,6 +7,7 @@ const surgerySchema = new Schema<ISurgery>(
     patient: { type: Types.ObjectId, ref: "user" },
     name: { type: String, required: [true, "Name is required"] },
     procedure: { type: String, required: [true, "procedure is required"] },
+    description: String,
     result: String,
   },
   {

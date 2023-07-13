@@ -19,11 +19,11 @@ class MedicalService {
         .populate({ path: "conductedBy", select: "fullname" });
 
     if (role?.name === "Nurse")
-      return await Medication.findOne({ _id: medId, conductedBy: conducted }, "-__v -_id")
+      return await Medication.findOne({ _id: medId, conductedBy: conducted }, "-__v ")
         .populate({ path: "patient", select: "fullname" })
         .populate({ path: "conductedBy", select: "fullname" });
 
-    return await Medication.findById(medId, "-__v -_id")
+    return await Medication.findById(medId, "-__v")
       .populate({ path: "patient", select: "fullname" })
       .populate({ path: "conductedBy", select: "fullname" });
   };
@@ -106,9 +106,9 @@ class MedicalService {
       const role = await Role.findById(registra.role, "name");
       if (role?.name === "Admin" || role?.name === "Doctor") {
         return await Medication.findByIdAndUpdate(medId, data, { upsert: true });
-      } else med = await Medication.findOne({ _id: medId, conductedBy: registra.id });      
+      } else med = await Medication.findOne({ _id: medId, conductedBy: registra.id });
       if (!med) return forbiddenError();
-      
+
       return Medication.findByIdAndUpdate({ _id: medId, conductedBy: registra.id }, data, { upsert: true });
     } catch (error) {
       return error;

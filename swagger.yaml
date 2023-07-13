@@ -16,6 +16,8 @@ tags:
     description: view lab result
   - name: medication
     description: Patients medication history
+  - name: surgery
+    description: Patient surgery procedure
 
 paths:
   /auth/login:
@@ -648,10 +650,12 @@ paths:
                   data:
                     type: object
                     properties:
-                      medication:
+                      report:
                         type: array
                         items:
                           $ref: "#/components/schemas/Medication"
+                      patient:
+                        $ref: "#/components/schemas/UserDataRequest"
                       count:
                         type: number
                       page:
@@ -850,6 +854,269 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /procedure:
+    get:
+      tags:
+        - surgery
+      security:
+        - bearerAuth: []
+      description: Patients surgery procedure history
+      summary: Retrive patients procedure
+      operationId: procedures
+      parameters:
+        - name: name
+          in: query
+          description: Procedure name
+          schema:
+            type: string
+        - name: description
+          in: query
+          description: search by procedure description
+          schema:
+            type: string
+        - name: procedure
+          in: query
+          description: Search by procedure
+          schema:
+            type: string
+        - name: result
+          in: query
+          description: search by procedure result
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: sort response, seperate multiple sort list with comma
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: search page
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: number of response per page
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      surgery:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Surgery"
+                      patient:
+                        $ref: "#/components/schemas/UserDataRequest"
+                      count:
+                        type: number
+                      page:
+                        type: number
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /procedure/{surgeryId}:
+    get:
+      description: get surgery details
+      summary: Surgery details
+      tags:
+        - surgery
+      security:
+        - bearerAuth: []
+      operationId: surgery
+      parameters:
+        - name: surgeryId
+          in: path
+          description: Surgery id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Surgery"
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthorized"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /procedure/new:
+    post:
+      tags:
+        - surgery
+      security:
+        - bearerAuth: []
+      description: New Surgery Procedure
+      summary: Create new Procedure for patients
+      operationId: newSurgery
+      requestBody:
+        description: name, pocedure field are required
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SurgeryNew"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Surgery data created
+                  data:
+                    type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          procedure:
+                            type: string
+                          SurgeryId:
+                            type: string
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthorized"
+        "404":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Validation"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /procedure/update/{surgeryId}:
+    put:
+      tags:
+        - surgery
+      summary: update patient Surgery record
+      operationId: updateSurgery
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: surgeryId
+          in: path
+          description: Surgery id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: update surgery record
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Surgery"
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Lab result updated
+                  data:
+                    $ref: "#/components/schemas/Surgery"
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthorized"
+        "404":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Validation"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     Duplicate:
@@ -971,6 +1238,32 @@ components:
         message:
           type: string
           example: resource not found
+
+    Surgery:
+      type: object
+      properties:
+        name:
+          type: string
+        procedure:
+          type: string
+        description:
+          type: string
+        result:
+          type: string
+
+    SurgeryNew:
+      type: object
+      properties:
+        name:
+          type: string
+        procedure:
+          type: string
+        email:
+          type: string
+        description:
+          type: string
+        result:
+          type: string
 
     Unauthenticated:
       type: object

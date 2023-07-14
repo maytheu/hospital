@@ -6,8 +6,8 @@ const surgeryRouter = Router();
 
 surgeryRouter.get("/", UtilsService.authentication, SurgeryCtrl.allProcedure);
 surgeryRouter.get("/:surgeryId", UtilsService.authentication, SurgeryCtrl.procedure);
-surgeryRouter.get("/new", UtilsService.authentication, UtilsService.doctorAuthorization, SurgeryCtrl.allProcedure);
-surgeryRouter.get(
+surgeryRouter.post("/new", UtilsService.authentication, UtilsService.doctorAuthorization, SurgeryCtrl.newProcedure);
+surgeryRouter.put(
   "/update/:surgeryId",
   UtilsService.authentication,
   UtilsService.doctorAuthorization,

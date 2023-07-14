@@ -1019,7 +1019,7 @@ paths:
                             type: string
                           procedure:
                             type: string
-                          SurgeryId:
+                          surgeryId:
                             type: string
         "401":
           description: Unauthenticated

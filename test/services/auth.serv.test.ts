@@ -507,25 +507,25 @@ describe("Unit test for auth service", () => {
     //   await appRequest.get(`${proUrl}?patientId=${patientId}`).set("Authorization", `Bearer ${tokenNur}`).expect(403);
     // });
 
-    // it("should return proedure for nurse", async () => {
-    //   await appRequest.get(`${proUrl}/${adminProId}`).set("Authorization", `Bearer ${tokenNur}`).expect(200);
-    // });
+    it("should return proedure for nurse", async () => {
+      await appRequest.get(`${proUrl}/${adminProId}`).set("Authorization", `Bearer ${tokenNur}`).expect(200);
+    });
 
-    // it("should return proedure 403 for nurse", async () => {
-    //   await appRequest.get(`${proUrl}/${docPRoId}`).set("Authorization", `Bearer ${tokenNur}`).expect(403);
-    // });
+    it("should return proedure 403 for nurse", async () => {
+      await appRequest.get(`${proUrl}/${docPRoId}`).set("Authorization", `Bearer ${tokenNur}`).expect(403);
+    });
 
-    // it("should return proedure for patient", async () => {
-    //   await appRequest.get(`${proUrl}/${adminProId}`).set("Authorization", `Bearer ${tokenPat}`).expect(200);
-    // });
+    it("should return proedure for patient", async () => {
+      await appRequest.get(`${proUrl}/${docPRoId}`).set("Authorization", `Bearer ${tokenPat}`).expect(200);
+    });
 
-    // it("should return proedure 403 for patiennnnt", async () => {
-    //   await appRequest.get(`${proUrl}/${docPRoId}`).set("Authorization", `Bearer ${tokenPat}`).expect(403);
-    // });
+    it("should return proedure 403 for patiennnnt", async () => {
+      await appRequest.get(`${proUrl}/${adminProId}`).set("Authorization", `Bearer ${tokenPat}`).expect(403);
+    });
 
-    // it("should return proedure for ddoc/admin", async () => {
-    //   await appRequest.get(`${proUrl}/${adminProId}`).set("Authorization", `Bearer ${tokenDoc}`).expect(200);
-    // });
+    it("should return proedure for ddoc/admin", async () => {
+      await appRequest.get(`${proUrl}/${adminProId}`).set("Authorization", `Bearer ${tokenDoc}`).expect(200);
+    });
 
     // it("should update procedure since its anadmin/doc", async () => {
     //   const resp = await appRequest

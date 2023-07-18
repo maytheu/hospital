@@ -44,6 +44,10 @@ class UtilsService {
     return role?.id;
   };
 
+  getRoleName = async (roleId: string) => {
+    return await Role.findById(roleId, "name");
+  };
+
   authentication: RequestHandler = async (req, res, next) => {
     try {
       const header = req.headers.authorization;

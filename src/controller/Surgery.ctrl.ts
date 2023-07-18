@@ -9,7 +9,15 @@ import AppError from "../utils/AppError";
 class SurgeryController extends Api {
   procedure: RequestHandler = async (req, res, next) => {
     try {
-      this.sendResp(res, "", {});
+      const {
+        params: { surgeryId },
+        user,
+      } = req;
+      
+      const data = await SurgeryService.procedure(surgeryId, user?.role, user?.id);      
+      if (data instanceof Error || data instanceof AppError) return next(data);
+
+      this.sendResp(res, "", data);
     } catch (error) {
       next(error);
     }
@@ -25,14 +33,14 @@ class SurgeryController extends Api {
 
   newProcedure: RequestHandler = async (req, res, next) => {
     try {
-      const d = ISurgeryData.safeParse(req.body);      
+      const d = ISurgeryData.safeParse(req.body);
       if (!d.success) return next(validationError(d.error));
 
       const { user } = req;
 
       const data = await SurgeryService.newProcedure(req.body, user?.id);
-      if(data instanceof Error|| data instanceof AppError)return next(data)
-     
+      if (data instanceof Error || data instanceof AppError) return next(data);
+
       this.sendCreatedResp(res, "Procedure recorded", data);
     } catch (error) {
       next(error);

@@ -440,7 +440,7 @@ describe("Unit test for auth service", () => {
       procedure: "doc pro",
     };
     const newProAdmi = {
-      name: "Doc proa",
+      name: "Doc nurse",
       description: "doc desca",
       email: "nurse@adetunjim.com",
       procedure: "doc proa",
@@ -448,7 +448,7 @@ describe("Unit test for auth service", () => {
     const newProErr = {
       description: "doc desc",
       email: "me@adetunjim.com",
-      procedure: "doc pro"
+      procedure: "doc pro",
     };
     let adminProId: string, docPRoId: string;
     const proUrl = "/hospital/api/v1/procedure";
@@ -480,32 +480,36 @@ describe("Unit test for auth service", () => {
       await appRequest.post(`${proUrl}/new`).set("Authorization", `Bearer ${tokenAdmin}`).send(newProErr).expect(422);
     });
 
-    // it("Should return all procedure for admin", async () => {
-    //   const resp = await appRequest.get(proUrl).set("Authorization", `Bearer ${tokenAdmin}`).expect(200);
-    //   expect(resp.body.data.count).toBe(2);
-    // });
+    it("Should return all procedure for admin", async () => {
+      const resp = await appRequest.get(proUrl).set("Authorization", `Bearer ${tokenAdmin}`).expect(200);
+      expect(resp.body.data.count).toBe(2);
+    });
 
-    // it("Should return  procedure for nurse as a patient", async () => {
-    //   const resp = await appRequest.get(proUrl).set("Authorization", `Bearer ${tokenNur}`).expect(200);
-    //   expect(resp.body.data.count).toBe(1);
-    // });
+    it("Should return  procedure for nurse as a patient", async () => {
+      const resp = await appRequest.get(proUrl).set("Authorization", `Bearer ${tokenNur}`).expect(200);
+      expect(resp.body.data.count).toBe(1);
+    });
 
-    // it("Should return all procedure for admin", async () => {
-    //   const resp = await appRequest.get(proUrl).set("Authorization", `Bearer ${tokenAdmin}`).expect(200);
-    //   expect(resp.body.data.count).toBe(2);
-    // });
+    it("Should return all procedure for admin", async () => {
+      const resp = await appRequest.get(proUrl).set("Authorization", `Bearer ${tokenAdmin}`).expect(200);
+      expect(resp.body.data.count).toBe(2);
+    });
 
-    // it("Should filter by patientid", async () => {
-    //   const resp = await appRequest
-    //     .get(`${proUrl}?patientId=${patientId}`)
-    //     .set("Authorization", `Bearer ${tokenDoc}`)
-    //     .expect(200);
-    //   expect(resp.body.data.count).toBe(1);
-    // });
+    it("Should filter by patientid", async () => {
+      const resp = await appRequest
+        .get(`${proUrl}?patientId=${patientId}`)
+        .set("Authorization", `Bearer ${tokenDoc}`)
+        .expect(200);
+      expect(resp.body.data.count).toBe(1);
+    });
 
-    // it("Should not return  procedure for nurse for viewing other procedure", async () => {
-    //   await appRequest.get(`${proUrl}?patientId=${patientId}`).set("Authorization", `Bearer ${tokenNur}`).expect(403);
-    // });
+    it("Should not return  procedure for nurse for viewing other procedure", async () => {
+      const resp = await appRequest
+        .get(`${proUrl}?patientId=${patientId}`)
+        .set("Authorization", `Bearer ${tokenNur}`)
+        .expect(200);
+      expect(resp.body.data.patient.name).toBe("test nurse");
+    });
 
     it("should return proedure for nurse", async () => {
       await appRequest.get(`${proUrl}/${adminProId}`).set("Authorization", `Bearer ${tokenNur}`).expect(200);
@@ -527,21 +531,36 @@ describe("Unit test for auth service", () => {
       await appRequest.get(`${proUrl}/${adminProId}`).set("Authorization", `Bearer ${tokenDoc}`).expect(200);
     });
 
-    // it("should update procedure since its anadmin/doc", async () => {
-    //   const resp = await appRequest
-    //     .put(`${proUrl}/update/${adminProId}`)
-    //     .set("Authorization", `Bearer ${tokenDoc}`)
-    //     .send({ result: "update" })
-    //     .expect(200);
-    //   expect(resp.body.data.result).toBe("update");
-    // });
+    it("should update procedure since its admin/doc", async () => {
+      const resp = await appRequest
+        .put(`${proUrl}/update/${adminProId}`)
+        .set("Authorization", `Bearer ${tokenDoc}`)
+        .send({ result: "update" })
+        .expect(200);
+      expect(resp.body.message).toBe("Procedure updated");
+    });
 
-    // it("should not update procedure since its an nurse", async () => {
-    //   const resp = await appRequest
-    //     .put(`${proUrl}/update/${adminProId}`)
-    //     .set("Authorization", `Bearer ${tokenNur}`)
-    //     .send({ result: "update" })
-    //     .expect(403);
-    // });
+    it("should not update procedure since its an nurse", async () => {
+      await appRequest
+        .put(`${proUrl}/update/${adminProId}`)
+        .set("Authorization", `Bearer ${tokenNur}`)
+        .send({ result: "update" })
+        .expect(403);
+    });
+
+    it("should delete procedure by admin", async () => {
+      await appRequest
+        .delete(`${proUrl}/${adminProId}`)
+        .set("Authorization", `Bearer ${tokenAdmin}`)
+        .expect(204);
+    });
+
+    it("should not delete procedure by doc", async () => {
+      await appRequest.delete(`${proUrl}/${adminProId}`).set("Authorization", `Bearer ${tokenDoc}`).expect(403);
+    });
+
+    it("should delete procedure by nurse", async () => {
+      await appRequest.delete(`${proUrl}/${adminProId}`).set("Authorization", `Bearer ${tokenNur}`).expect(403);
+    });
   });
 });

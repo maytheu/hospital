@@ -25,3 +25,14 @@ export interface MedObj {
   patient: string;
   conductedBy: string;
 }
+
+export interface SurObj {
+  name: QueryOptions;
+  description: QueryOptions;
+  result: QueryOptions;
+  sort: string;
+  page: string;
+  limit: string;
+  patient: string;
+  conductedBy: string;
+}

@@ -1,7 +1,7 @@
 import e, { RequestHandler } from "express";
 
 import Api from "./Api";
-import { ISurgeryData } from "../utils/interface/surgery.interface";
+import { ISurgeryData, ISurgeryUpdateData } from "../utils/interface/surgery.interface";
 import { validationError } from "../services/error";
 import SurgeryService from "../services/Surgery.service";
 import AppError from "../utils/AppError";
@@ -13,8 +13,8 @@ class SurgeryController extends Api {
         params: { surgeryId },
         user,
       } = req;
-      
-      const data = await SurgeryService.procedure(surgeryId, user?.role, user?.id);      
+
+      const data = await SurgeryService.procedure(surgeryId, user?.role, user?.id);
       if (data instanceof Error || data instanceof AppError) return next(data);
 
       this.sendResp(res, "", data);
@@ -25,7 +25,10 @@ class SurgeryController extends Api {
 
   allProcedure: RequestHandler = async (req, res, next) => {
     try {
-      this.sendResp(res, "", {});
+      const data = await SurgeryService.allProcedure(req);
+      if (data instanceof Error || data instanceof AppError) return next(data);
+
+      this.sendResp(res, "", data);
     } catch (error) {
       next(error);
     }
@@ -49,14 +52,25 @@ class SurgeryController extends Api {
 
   updateProcedure: RequestHandler = async (req, res, next) => {
     try {
-      this.sendResp(res, "", {});
+      const d = ISurgeryUpdateData.safeParse(req.body);
+      if (!d.success) return next(validationError(d.error));
+
+      const { surgeryId } = req.params;
+
+      const data = await SurgeryService.updateProcedure(req.body, surgeryId);
+      if (data instanceof Error || data instanceof AppError) return next(data);
+      this.sendResp(res, "Procedure updated", data);
     } catch (error) {
       next(error);
     }
   };
 
-  deleterocedure: RequestHandler = async (req, res, next) => {
+  deleteProcedure: RequestHandler = async (req, res, next) => {
     try {
+      const { surgeryId } = req.params;
+      const data = await SurgeryService.deleteProcedure(surgeryId);
+      if (data instanceof Error || data instanceof AppError) return next(data);
+
       this.sendDelResp(res, "");
     } catch (error) {
       next(error);

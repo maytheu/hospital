@@ -869,7 +869,7 @@ paths:
           description: Procedure name
           schema:
             type: string
-        - name: description
+        - name: desc
           in: query
           description: search by procedure description
           schema:
@@ -882,6 +882,11 @@ paths:
         - name: result
           in: query
           description: search by procedure result
+          schema:
+            type: string
+        - name: patientId
+          in: query
+          description: return all patient procedure
           schema:
             type: string
         - name: sort
@@ -963,6 +968,43 @@ paths:
                     type: string
                   data:
                     $ref: "#/components/schemas/Surgery"
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthenticated"
+        "403":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Unauthorized"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      description: Delete procedure
+      summary: Accesible only to admin
+      tags:
+        - surgery
+      security:
+        - bearerAuth: []
+      operationId: deleteSurgery
+      parameters:
+        - name: surgeryId
+          in: path
+          description: Surgery id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
         "401":
           description: Unauthenticated
           content:
@@ -1117,6 +1159,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+
 components:
   schemas:
     Duplicate:

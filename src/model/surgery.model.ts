@@ -9,6 +9,7 @@ const surgerySchema = new Schema<ISurgery>(
     procedure: { type: String, required: [true, "procedure is required"] },
     description: String,
     result: String,
+    deleted: { type: Boolean, default: false },
   },
   {
     timestamps: true,
